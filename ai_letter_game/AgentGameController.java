@@ -6,11 +6,16 @@ import jade.domain.FIPAAgentManagement.AMSAgentDescription;
 import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
 
 @SuppressWarnings("serial")
 public class AgentGameController extends MockAgent {
 	private LetterGameGui myGui = null;
-	private AgentContainer ac = null;
+	private AgentContainer container = null;
+	private AgentController acPlayer1 = null;
+	private AgentController acPlayer2 = null;
+	private AgentController acPlayer3 = null;
+	private AgentController acPlayer4 = null;
 
 	public AgentGameController() {
 		this.serviceDescriptionType = "controller" + hashCode();
@@ -26,7 +31,7 @@ public class AgentGameController extends MockAgent {
 		super.setup();
 
 		// Get the Container
-		ac = getContainerController();
+		container = getContainerController();
 	}
 
 	public void startGame() {
@@ -43,20 +48,16 @@ public class AgentGameController extends MockAgent {
 
 		// create the players
 		try {
-			System.out.println(ac == null);
-			(ac.createNewAgent("Player1", "ai_letter_game.AgentPlayer", null))
-					.start();
-			(ac.createNewAgent("Player2", "ai_letter_game.AgentPlayer", null))
-					.start();
-			(ac.createNewAgent("Player3", "ai_letter_game.AgentPlayer", null))
-					.start();
-			(ac.createNewAgent("Player4", "ai_letter_game.AgentPlayer", null))
-					.start();
+			acPlayer1 = container.createNewAgent("Player1", "ai_letter_game.AgentPlayer", null);
+			acPlayer2 = container.createNewAgent("Player2", "ai_letter_game.AgentPlayer", null);
+			acPlayer3 = container.createNewAgent("Player3", "ai_letter_game.AgentPlayer", null);
+			acPlayer4 = container.createNewAgent("Player4", "ai_letter_game.AgentPlayer", null);
+			acPlayer1.start();
+			acPlayer2.start();
+			acPlayer3.start();
+			acPlayer4.start();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} finally {
-			myGui = null;
-			ac = null;
 		}
 
 		// arranging little delay, until the player agents are loaded
@@ -88,6 +89,20 @@ public class AgentGameController extends MockAgent {
 	}
 
 	public void stopGame() {
-
+		// remove the players
+		try {
+			acPlayer1.kill();
+			acPlayer2.kill();
+			acPlayer3.kill();
+			acPlayer4.kill();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			acPlayer1 = null;
+			acPlayer2 = null;
+			acPlayer3 = null;
+			acPlayer4 = null;
+		}
 	}
+	
 }
