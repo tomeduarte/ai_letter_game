@@ -15,7 +15,7 @@ public class AILetterGame
 		try {
 			argsList.add("-classpath");
 			argsList.add(projectDir.getAbsolutePath() + "\\classes");
-			argsList.add("Sniffer:jade.tools.sniffer.Sniffer gameController:ai_letter_game.AgentGameController gamePlayer:ai_letter_game.AgentPlayer");
+			argsList.add("gameController:ai_letter_game.AgentGameController");
 			
 			String[] arguments = new String[argsList.size()];
 			arguments = argsList.toArray(arguments);
