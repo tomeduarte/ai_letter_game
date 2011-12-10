@@ -31,3 +31,10 @@ local.properties
 
 # PDT-specific
 .buildpath
+
+# JADE
+APDescription.txt
+MTPs-Main-Container.txt
+
+# Project-specific
+classes/
