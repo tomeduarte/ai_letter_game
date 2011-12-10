@@ -40,8 +40,7 @@ public class AgentGameController extends MockAgent {
 			public void action() {
 				ACLMessage msg = receive();
 				if (msg != null)
-					System.out.println("== Answer" + " <- " + msg.getContent()
-							+ " from " + msg.getSender().getName());
+					consoleLog("== Answer" + " <- " + msg.getContent() + " from " + msg.getSender().getName());
 				block();
 			}
 		});
@@ -103,6 +102,10 @@ public class AgentGameController extends MockAgent {
 			acPlayer3 = null;
 			acPlayer4 = null;
 		}
+	}
+	
+	private void consoleLog(String message) {
+		myGui.consoleLog("[GAME] " + message);
 	}
 	
 }

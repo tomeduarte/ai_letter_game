@@ -1,9 +1,5 @@
 package ai_letter_game;
 
-import jade.Boot3;
-
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -53,7 +49,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	public LetterGameGui(AgentGameController agent) {
 		myAgent = agent;
 		
-		setTitle("AI Letter Game");
+		setTitle("A.I. Letter Game");
 		setResizable(false);
 		setAlwaysOnTop(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -71,7 +67,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtConsoleLog, 0, SpringLayout.SOUTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtConsoleLog, -15, SpringLayout.EAST, contentPane);
 		txtConsoleLog.setEditable(false);
-		txtConsoleLog.setText("Lorem Ipsum Sit Dolor Amet");
+		txtConsoleLog.setText("Welcome to the A.I. Letter Game!");
 		txtConsoleLog.setForeground(Color.WHITE);
 		txtConsoleLog.setBackground(new Color(0, 0, 0));
 		txtConsoleLog.setRows(20);
@@ -215,13 +211,14 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		contentPane.add(btnStopGame);
 	}
 
-	/*
-	 * handle user actions
+	/**
+	 * Handle user actions
 	 */
 	public void actionPerformed(ActionEvent ae) {
 		String action = ae.getActionCommand();
 		
 		if(action.equals("Start game!")) {
+			doLog("Starting game..");
 			// switch enabled action buttons
 			btnStartGame.setEnabled(false);
 			comboPlayer1.setEnabled(false);
@@ -230,7 +227,9 @@ public class LetterGameGui extends JFrame implements ActionListener{
 			comboPlayer4.setEnabled(false);
 			btnStopGame.setEnabled(true);
 			myAgent.startGame();
+			doLog("OK");
 		} else if(action.equals("Stop game")) {
+			doLog("Stopping game..");
 			// switch enabled action buttons
 			btnStopGame.setEnabled(false);
 			comboPlayer1.setEnabled(true);
@@ -239,6 +238,21 @@ public class LetterGameGui extends JFrame implements ActionListener{
 			comboPlayer4.setEnabled(true);
 			btnStartGame.setEnabled(true);
 			myAgent.stopGame();
+			doLog("OK");
 		}
+	}
+	
+	/**
+	 *  Log messages to the Console Log
+	 */
+	protected void consoleLog(String message) {
+		txtConsoleLog.append("\n" + message);
+	}
+	
+	/**
+	 * Log messages from the UI
+	 */
+	private void doLog(String message) {
+		consoleLog("[UI] " + message);
 	}
 }
