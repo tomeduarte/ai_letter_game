@@ -7,9 +7,8 @@ import java.util.List;
 public class AILetterGame 
 {
 	public AILetterGame() { }
-
-	public void go()
-	{
+	
+	public void go() {
 		Boot3 bootInstance = null;
 		File projectDir = new File(".");
 		List<String> argsList = new ArrayList<String>();

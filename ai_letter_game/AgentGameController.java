@@ -9,9 +9,15 @@ import jade.lang.acl.ACLMessage;
 @SuppressWarnings("serial")
 public class AgentGameController extends MockAgent 
 {
+	private LetterGameGui myGui = null;
+	
 	public AgentGameController() {
 		this.serviceDescriptionType = "controller" + hashCode();
 		this.serviceDescriptionName = "game-controller" + hashCode();
+		
+	      // Set up the gui
+	      myGui = new LetterGameGui(this);
+	      myGui.setVisible(true);
 	}
 
 	@Override
@@ -20,40 +26,46 @@ public class AgentGameController extends MockAgent
 		// arranging little delay, until the player agents are loaded
 		try {
 			Thread.sleep(2000l);
-			AMSAgentDescription [] agents = null;
-	      	try {
-	            SearchConstraints c = new SearchConstraints();
-	            c.setMaxResults (new Long(-1));
-				agents = AMSService.search( this, new AMSAgentDescription (), c );
-			}
-			catch (Exception e) {
-	            System.out.println( "Problem searching AMS: " + e );
-	            e.printStackTrace();
-			}
-			
-			
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.setContent( "Ping" );
-
-			for (int i=0; i<agents.length;i++)
-				msg.addReceiver( agents[i].getName() ); 
-
-			send(msg);
-			
-			addBehaviour(new CyclicBehaviour(this) 
-			{
-				 public void action() {
-					ACLMessage msg= receive();
-					if (msg!=null)
-						System.out.println( "== Answer" + " <- " 
-						 +  msg.getContent() + " from "
-						 +  msg.getSender().getName() );
-					block();
-				 }
-			});
 		} 
 		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void startGame() {
+		AMSAgentDescription [] agents = null;
+      	try {
+            SearchConstraints c = new SearchConstraints();
+            c.setMaxResults (new Long(-1));
+			agents = AMSService.search( this, new AMSAgentDescription (), c );
+		} catch (Exception e) {
+            System.out.println( "Problem searching AMS: " + e );
+            e.printStackTrace();
+		}
+		
+		
+		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+		msg.setContent( "Ping" );
+
+		for (int i=0; i<agents.length;i++)
+			msg.addReceiver( agents[i].getName() ); 
+
+		send(msg);
+		
+		addBehaviour(new CyclicBehaviour(this) 
+		{
+			 public void action() {
+				ACLMessage msg= receive();
+				if (msg!=null)
+					System.out.println( "== Answer" + " <- " 
+					 +  msg.getContent() + " from "
+					 +  msg.getSender().getName() );
+				block();
+			 }
+		});
+	}
+	
+	public void stopGame() {
+		
 	}
 }

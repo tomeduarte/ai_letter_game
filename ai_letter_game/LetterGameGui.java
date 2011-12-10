@@ -1,5 +1,7 @@
 package ai_letter_game;
 
+import jade.Boot3;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -10,38 +12,47 @@ import javax.swing.JTextArea;
 import java.awt.Color;
 import javax.swing.SpringLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+
 import javax.swing.UIManager;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+import java.awt.event.ActionListener;
 
-public class LetterGameGui extends JFrame {
+public class LetterGameGui extends JFrame implements ActionListener{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8092527406687437334L;
-	private JPanel contentPane;
+	private static AgentGameController myAgent; // Reference to the agent class
 
 	/**
-	 * Launch the application.
+	 * UI components
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LetterGameGui frame = new LetterGameGui();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private JPanel contentPane;
+	private JTextArea txtConsoleLog;
+	private JTextPane txtInfoPlayer1;
+	private JTextPane txtInfoPlayer2;
+	private JTextPane txtInfoPlayer3;
+	private JTextPane txtInfoPlayer4;
+	private JTextPane lblConsoleLog;
+	private JTextPane lblPlayerSelection;
+	private JTextPane lblInfoPlayer;
+	private JTextPane lblPlayer1;
+	private JTextPane lblPlayer2;
+	private JTextPane lblPlayer3;
+	private JTextPane lblPlayer4;
+	private JComboBox comboPlayer1;
+	private JComboBox comboPlayer2;
+	private JComboBox comboPlayer3;
+	private JComboBox comboPlayer4;
+	private JButton btnStartGame;
+	private JButton btnStopGame;
 
 	/**
 	 * Create the frame.
 	 */
-	public LetterGameGui() {
+	public LetterGameGui(AgentGameController agent) {
+		myAgent = agent;
+		
 		setTitle("AI Letter Game");
 		setResizable(false);
 		setAlwaysOnTop(true);
@@ -54,7 +65,7 @@ public class LetterGameGui extends JFrame {
 		SpringLayout sl_contentPane = new SpringLayout();
 		contentPane.setLayout(sl_contentPane);
 		
-		JTextArea txtConsoleLog = new JTextArea();
+		txtConsoleLog = new JTextArea();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtConsoleLog, -284, SpringLayout.SOUTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, txtConsoleLog, 10, SpringLayout.WEST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtConsoleLog, 0, SpringLayout.SOUTH, contentPane);
@@ -66,7 +77,7 @@ public class LetterGameGui extends JFrame {
 		txtConsoleLog.setRows(20);
 		contentPane.add(txtConsoleLog);
 		
-		JTextPane txtInfoPlayer2 = new JTextPane();
+		txtInfoPlayer2 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtInfoPlayer2, 56, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, txtInfoPlayer2, -105, SpringLayout.EAST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtInfoPlayer2, 116, SpringLayout.NORTH, contentPane);
@@ -76,7 +87,7 @@ public class LetterGameGui extends JFrame {
 		txtInfoPlayer2.setEditable(false);
 		contentPane.add(txtInfoPlayer2);
 		
-		JTextPane txtInfoPlayer4 = new JTextPane();
+		txtInfoPlayer4 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtInfoPlayer4, 149, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtInfoPlayer4, -75, SpringLayout.NORTH, txtConsoleLog);
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtInfoPlayer4, -15, SpringLayout.EAST, contentPane);
@@ -85,7 +96,7 @@ public class LetterGameGui extends JFrame {
 		txtInfoPlayer4.setEditable(false);
 		contentPane.add(txtInfoPlayer4);
 		
-		JTextPane txtInfoPlayer3 = new JTextPane();
+		txtInfoPlayer3 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.WEST, txtInfoPlayer3, 521, SpringLayout.WEST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtInfoPlayer3, -75, SpringLayout.NORTH, txtConsoleLog);
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtInfoPlayer3, -179, SpringLayout.EAST, contentPane);
@@ -95,7 +106,7 @@ public class LetterGameGui extends JFrame {
 		txtInfoPlayer3.setEditable(false);
 		contentPane.add(txtInfoPlayer3);
 		
-		JTextPane txtInfoPlayer1 = new JTextPane();
+		txtInfoPlayer1 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtInfoPlayer3, 33, SpringLayout.SOUTH, txtInfoPlayer1);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtInfoPlayer1, 0, SpringLayout.NORTH, txtInfoPlayer2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, txtInfoPlayer1, 0, SpringLayout.WEST, txtInfoPlayer3);
@@ -106,7 +117,7 @@ public class LetterGameGui extends JFrame {
 		txtInfoPlayer1.setEditable(false);
 		contentPane.add(txtInfoPlayer1);
 		
-		JTextPane lblConsoleLog = new JTextPane();
+		lblConsoleLog = new JTextPane();
 		lblConsoleLog.setForeground(UIManager.getColor("CheckBoxMenuItem.selectionBackground"));
 		lblConsoleLog.setFont(new Font("Helvetica", Font.PLAIN, 16));
 		lblConsoleLog.setBackground(Color.LIGHT_GRAY);
@@ -115,7 +126,7 @@ public class LetterGameGui extends JFrame {
 		lblConsoleLog.setText("Console Log:");
 		contentPane.add(lblConsoleLog);
 		
-		JTextPane lblPlayerSelection = new JTextPane();
+		lblPlayerSelection = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblPlayerSelection, 10, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPlayerSelection, 0, SpringLayout.WEST, txtConsoleLog);
 		lblPlayerSelection.setText("Player selection:");
@@ -124,7 +135,7 @@ public class LetterGameGui extends JFrame {
 		lblPlayerSelection.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(lblPlayerSelection);
 		
-		JTextPane lblInfoPlayer = new JTextPane();
+		lblInfoPlayer = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblInfoPlayer, 0, SpringLayout.NORTH, lblPlayerSelection);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblInfoPlayer, 0, SpringLayout.WEST, txtInfoPlayer3);
 		lblInfoPlayer.setText("Player's info:");
@@ -133,7 +144,7 @@ public class LetterGameGui extends JFrame {
 		lblInfoPlayer.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(lblInfoPlayer);
 		
-		JTextPane lblPlayer1 = new JTextPane();
+		lblPlayer1 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblPlayer1, 29, SpringLayout.SOUTH, lblPlayerSelection);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPlayer1, 39, SpringLayout.WEST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblPlayer1, -433, SpringLayout.WEST, txtInfoPlayer1);
@@ -141,11 +152,11 @@ public class LetterGameGui extends JFrame {
 		lblPlayer1.setText("Player 1");
 		contentPane.add(lblPlayer1);
 		
-		JComboBox comboPlayer3 = new JComboBox();
+		comboPlayer3 = new JComboBox();
 		comboPlayer3.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(comboPlayer3);
 		
-		JTextPane lblPlayer2 = new JTextPane();
+		lblPlayer2 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblPlayer2, 94, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblPlayer1, -11, SpringLayout.NORTH, lblPlayer2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPlayer2, 0, SpringLayout.WEST, lblPlayer1);
@@ -153,14 +164,14 @@ public class LetterGameGui extends JFrame {
 		lblPlayer2.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(lblPlayer2);
 		
-		JTextPane lblPlayer3 = new JTextPane();
+		lblPlayer3 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.WEST, comboPlayer3, 18, SpringLayout.EAST, lblPlayer3);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPlayer3, 0, SpringLayout.WEST, lblPlayer1);
 		lblPlayer3.setText("Player 3");
 		lblPlayer3.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(lblPlayer3);
 		
-		JTextPane lblPlayer4 = new JTextPane();
+		lblPlayer4 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblPlayer4, 161, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblPlayer3, -15, SpringLayout.NORTH, lblPlayer4);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPlayer4, 0, SpringLayout.WEST, lblPlayer1);
@@ -168,37 +179,66 @@ public class LetterGameGui extends JFrame {
 		lblPlayer4.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(lblPlayer4);
 		
-		JComboBox comboPlayer4 = new JComboBox();
+		comboPlayer4 = new JComboBox();
 		sl_contentPane.putConstraint(SpringLayout.WEST, comboPlayer4, 18, SpringLayout.EAST, lblPlayer4);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, comboPlayer3, -4, SpringLayout.NORTH, comboPlayer4);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, comboPlayer4, 156, SpringLayout.NORTH, contentPane);
 		comboPlayer4.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(comboPlayer4);
 		
-		JComboBox comboPlayer2 = new JComboBox();
+		comboPlayer2 = new JComboBox();
 		sl_contentPane.putConstraint(SpringLayout.WEST, comboPlayer2, 18, SpringLayout.EAST, lblPlayer2);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, comboPlayer2, 0, SpringLayout.SOUTH, txtInfoPlayer2);
 		comboPlayer2.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(comboPlayer2);
 		
-		JComboBox comboPlayer1 = new JComboBox();
+		comboPlayer1 = new JComboBox();
 		sl_contentPane.putConstraint(SpringLayout.WEST, comboPlayer1, 106, SpringLayout.WEST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, comboPlayer1, 0, SpringLayout.NORTH, txtInfoPlayer2);
 		comboPlayer1.setBackground(Color.LIGHT_GRAY);
 		contentPane.add(comboPlayer1);
 		
-		JButton btnStartGame = new JButton("Start game!");
+		btnStartGame = new JButton("Start game!");
+		btnStartGame.addActionListener(this);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnStartGame, 77, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnStartGame, 61, SpringLayout.EAST, comboPlayer3);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStartGame, 0, SpringLayout.SOUTH, comboPlayer3);
 		sl_contentPane.putConstraint(SpringLayout.EAST, btnStartGame, -187, SpringLayout.WEST, txtInfoPlayer1);
 		contentPane.add(btnStartGame);
 		
-		JButton btnStopGame = new JButton("Stop game");
+		btnStopGame = new JButton("Stop game");
+		btnStopGame.addActionListener(this);
 		btnStopGame.setEnabled(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnStopGame, 77, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnStopGame, 30, SpringLayout.EAST, btnStartGame);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStopGame, 0, SpringLayout.SOUTH, comboPlayer3);
 		contentPane.add(btnStopGame);
+	}
+
+	/*
+	 * handle user actions
+	 */
+	public void actionPerformed(ActionEvent ae) {
+		String action = ae.getActionCommand();
+		
+		if(action.equals("Start game!")) {
+			// switch enabled action buttons
+			btnStartGame.setEnabled(false);
+			comboPlayer1.setEnabled(false);
+			comboPlayer2.setEnabled(false);
+			comboPlayer3.setEnabled(false);
+			comboPlayer4.setEnabled(false);
+			btnStopGame.setEnabled(true);
+			myAgent.startGame();
+		} else if(action.equals("Stop game")) {
+			// switch enabled action buttons
+			btnStopGame.setEnabled(false);
+			comboPlayer1.setEnabled(true);
+			comboPlayer2.setEnabled(true);
+			comboPlayer3.setEnabled(true);
+			comboPlayer4.setEnabled(true);
+			btnStartGame.setEnabled(true);
+			myAgent.stopGame();
+		}
 	}
 }
