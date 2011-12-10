@@ -1,4 +1,4 @@
-package aiad;
+package ai_letter_game;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;

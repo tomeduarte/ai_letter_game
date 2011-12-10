@@ -1,12 +1,12 @@
-package aiad;
+package ai_letter_game;
 import jade.Boot3;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AIAD 
+public class AILetterGame 
 {
-	public AIAD() { }
+	public AILetterGame() { }
 
 	public void go()
 	{
@@ -16,7 +16,7 @@ public class AIAD
 		try {
 			argsList.add("-classpath");
 			argsList.add(projectDir.getAbsolutePath() + "\\classes");
-			argsList.add("Sniffer:jade.tools.sniffer.Sniffer gameController:AgentGameController");
+			argsList.add("Sniffer:jade.tools.sniffer.Sniffer gameController:ai_letter_game.AgentGameController gamePlayer:ai_letter_game.AgentPlayer");
 			
 			String[] arguments = new String[argsList.size()];
 			arguments = argsList.toArray(arguments);
@@ -33,6 +33,6 @@ public class AIAD
 	}
 	
 	public static void main(String[] args) {
-		(new AIAD()).go();
+		(new AILetterGame()).go();
 	}
 }
