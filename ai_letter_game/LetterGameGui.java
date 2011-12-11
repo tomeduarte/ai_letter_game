@@ -10,6 +10,7 @@ import javax.swing.SpringLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
@@ -24,6 +25,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	 * UI components
 	 */
 	private JPanel contentPane;
+	private JScrollPane consoleLogScroll;
 	private JTextArea txtConsoleLog;
 	private JTextPane txtInfoPlayer1;
 	private JTextPane txtInfoPlayer2;
@@ -62,16 +64,18 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		contentPane.setLayout(sl_contentPane);
 		
 		txtConsoleLog = new JTextArea();
-		sl_contentPane.putConstraint(SpringLayout.NORTH, txtConsoleLog, -284, SpringLayout.SOUTH, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.WEST, txtConsoleLog, 10, SpringLayout.WEST, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtConsoleLog, 0, SpringLayout.SOUTH, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.EAST, txtConsoleLog, -15, SpringLayout.EAST, contentPane);
+		txtConsoleLog.setLineWrap(true);
+		consoleLogScroll = new JScrollPane(txtConsoleLog); 
+		sl_contentPane.putConstraint(SpringLayout.NORTH, consoleLogScroll, -284, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.WEST, consoleLogScroll, 10, SpringLayout.WEST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, consoleLogScroll, 0, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, consoleLogScroll, -15, SpringLayout.EAST, contentPane);
 		txtConsoleLog.setEditable(false);
 		txtConsoleLog.setText("Welcome to the A.I. Letter Game!");
 		txtConsoleLog.setForeground(Color.WHITE);
 		txtConsoleLog.setBackground(new Color(0, 0, 0));
-		txtConsoleLog.setRows(20);
-		contentPane.add(txtConsoleLog);
+		txtConsoleLog.setRows(15);
+		contentPane.add(consoleLogScroll);
 		
 		txtInfoPlayer2 = new JTextPane();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, txtInfoPlayer2, 56, SpringLayout.NORTH, contentPane);
