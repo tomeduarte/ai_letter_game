@@ -1,7 +1,10 @@
 package ai_letter_game;
 
+import ai_letter_game.AgentPlayer.waitCFPBehaviour;
+import ai_letter_game.AgentPlayer.waitTurnBehaviour;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.AMSService;
 import jade.domain.FIPAAgentManagement.AMSAgentDescription;
 import jade.domain.FIPAAgentManagement.SearchConstraints;
@@ -17,10 +20,7 @@ public class AgentGameController extends MockAgent {
 	
 	// for the player agents
 	private AgentContainer container = null;
-	private AgentController acPlayer1 = null;
-	private AgentController acPlayer2 = null;
-	private AgentController acPlayer3 = null;
-	private AgentController acPlayer4 = null;
+	private AgentController[] acPlayers;
 
 	// game levels
 	private final int LEVEL1 = 1;
@@ -28,7 +28,7 @@ public class AgentGameController extends MockAgent {
 	private final int LEVEL3 = 3;
 	
 	// current player
-	private AgentController acCurrentPlayer = null;
+	private int currentPlayer = 0;
 	
 	// game state
 	private final int startMoney = 5;
@@ -66,16 +66,11 @@ public class AgentGameController extends MockAgent {
 
 		// create the players
 		try {
-			acPlayer1 = container.createNewAgent("Player1", "ai_letter_game.AgentPlayer", null);
-			acPlayer2 = container.createNewAgent("Player2", "ai_letter_game.AgentPlayer", null);
-			acPlayer3 = container.createNewAgent("Player3", "ai_letter_game.AgentPlayer", null);
-			acPlayer4 = container.createNewAgent("Player4", "ai_letter_game.AgentPlayer", null);
-			acPlayer1.start();
-			acPlayer2.start();
-			acPlayer3.start();
-			acPlayer4.start();
-						
-			acCurrentPlayer = acPlayer1;
+			acPlayers = new AgentController[4];
+			for(int i=0; i < 4; i++) {
+				acPlayers[i] = container.createNewAgent("Player"+(i+1), "ai_letter_game.AgentPlayer", null);
+				acPlayers[i].start();
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -90,45 +85,46 @@ public class AgentGameController extends MockAgent {
 
 		consoleLog("sending game start information to all players");
 		// wakie wakie!
-//		AMSAgentDescription[] agents = null;
-//		try {
-//			SearchConstraints c = new SearchConstraints();
-//			c.setMaxResults(new Long(-1));
-//			agents = AMSService.search(this, new AMSAgentDescription(), c);
-//		} catch (Exception e) {
-//			System.out.println("Problem searching AMS: " + e);
-//			e.printStackTrace();
-//		}
-
 		try {
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(new AID(acPlayer1.getName(), AID.ISGUID));
-			msg.setContent(startMoney+";hello;aiad");
-			
-			send(msg);
+			for(int i=0; i<4; i++) {
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
+				msg.setContent(startMoney+";hello;olleh;"+(currentPlayer == i));
+				send(msg);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-//		for (int i = 0; i < agents.length; i++)
-//			msg.addReceiver(agents[i].getName());
-
+		addBehaviour(new startTurnBehaviour());
 	}
 
 	public void stopGame() {
 		// remove the players
 		try {
-			acPlayer1.kill();
-			acPlayer2.kill();
-			acPlayer3.kill();
-			acPlayer4.kill();
+			for(int i=0; i<4; i++)
+				acPlayers[i].kill();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
-			acPlayer1 = null;
-			acPlayer2 = null;
-			acPlayer3 = null;
-			acPlayer4 = null;
+			for(int i=0; i<4; i++)
+				acPlayers[i] = null;
+			acPlayers = null;
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	class startTurnBehaviour extends OneShotBehaviour {
+
+		public void action() {
+			try {
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
+				msg.setContent("Somebody set up us the bomb.");
+				send(msg);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
