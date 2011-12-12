@@ -1,5 +1,7 @@
 package ai_letter_game;
 
+import java.util.Arrays;
+
 import javax.swing.text.html.HTMLDocument.Iterator;
 
 import ai_letter_game.AgentGameController.doTurnBehaviour;
@@ -13,12 +15,15 @@ import jade.lang.acl.ACLMessage;
 public class AgentPlayer extends MockAgent 
 {
 	private int credits;
-	private String goalString;
+	private String[] goalStrings;
 	private char[] letters;
 	
 	public AgentPlayer() {
 		this.serviceDescriptionType = "player" + hashCode();
 		this.serviceDescriptionName = "game-player" + hashCode();
+		
+		goalStrings = new String[3];
+		letters = new char[15];
 	}
 
 	@Override
@@ -30,14 +35,16 @@ public class AgentPlayer extends MockAgent
 	protected boolean canBuildGoalString() {
 		String tmp = new String(letters);
 		
-		for (int i = 0; i < goalString.length(); i++){
-		    char c = goalString.charAt(i);        
-		    int index = tmp.indexOf(c);
-		    
-		    if(index == -1)
-		    	return false;
-		    else
-		    	tmp = tmp.substring(0,index)+tmp.substring(index+1);
+		for(int j = 0; j < goalStrings.length; j++ ) {
+			for (int i = 0; i < goalStrings[j].length(); i++) {
+			    char c = goalStrings[j].charAt(i);        
+			    int index = tmp.indexOf(c);
+			    
+			    if(index == -1)
+			    	return false;
+			    else
+			    	tmp = tmp.substring(0,index)+tmp.substring(index+1);
+			}
 		}
 		
 		return true;
@@ -52,11 +59,13 @@ public class AgentPlayer extends MockAgent
 
 			// set game state according to instructions from the controller
 			credits = Integer.parseInt(info[0]);
-			goalString = info[1];
-			letters = info[2].toCharArray();
+			goalStrings[0] = info[1];
+			goalStrings[1] = info[2];
+			goalStrings[2] = info[3];
+			letters = info[4].toCharArray();
 			
 			// is it my turn next or should I wait for CFP ?
-			if(Boolean.parseBoolean(info[3])) {
+			if(Boolean.parseBoolean(info[5])) {
 				addBehaviour(new waitTurnBehaviour());
 			} else {
 				addBehaviour(new waitCFPBehaviour());

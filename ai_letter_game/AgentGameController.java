@@ -1,5 +1,15 @@
 package ai_letter_game;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
 import ai_letter_game.AgentPlayer.waitCFPBehaviour;
 import ai_letter_game.AgentPlayer.waitTurnBehaviour;
 import jade.core.AID;
@@ -93,11 +103,13 @@ public class AgentGameController extends MockAgent {
 		}
 
 		consoleLog("sending game start information to all players");
+		String[] goalWords = getGoalWords();
+		String[] startingLetters = getStartingLetters(goalWords);
 		try {
 			for(int i=0; i<4; i++) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
-				msg.setContent(startMoney+";hello;olleh;"+(currentPlayer == i));
+				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+4]+";"+goalWords[i+8]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
 			}
 		} catch (Exception e) {
@@ -106,7 +118,7 @@ public class AgentGameController extends MockAgent {
 
 		myAddBehaviour(new startTurnBehaviour());
 	}
-
+	
 	public void stopGame() {
 		removeBehaviour(currentBehaviour);
 		currentBehaviour = null;
@@ -234,7 +246,7 @@ public class AgentGameController extends MockAgent {
 		}
 		
 		return nextPlayer;
-	}
+	}	
 	
 	private boolean activePlayersAvailable() {
 		int counter = 0;
@@ -253,6 +265,86 @@ public class AgentGameController extends MockAgent {
 				winner = i;
 		}
 		
-		consoleLog("== Player" + winner+1 + " has won the game with " + credits[winner] + " credits! ==");
+		consoleLog("== Player" + (winner+1) + " has won the game with " + credits[winner] + " credits! ==");
+	}
+	
+	private String[] getStartingLetters(String[] words) {
+		String letters = new String();
+		
+		for(int i=0; i < words.length; i++) {
+			letters += words[i];
+		}
+		List<Character> characters = new ArrayList<Character>();
+        for(char c:letters.toCharArray()){
+            characters.add(c);
+        }      
+        StringBuilder output = new StringBuilder(letters.length());
+        while(characters.size()!=0){
+            int randPicker = (int)(Math.random()*characters.size());
+            output.append(characters.remove(randPicker));
+        }
+		String[] startingLetters = output.toString().split("(?<=\\G.{15})");
+		return startingLetters;
+	}
+
+	private String[] getGoalWords() {
+		
+		String[] goalWords = new String[12];
+		int[] rnd = new int[4];
+		Random gen = new Random();
+
+		try {
+			FileReader input = new FileReader("words/word4.txt");
+			BufferedReader bufRead = new BufferedReader(input);
+	
+			// gerar 4 indexes para linhas aleatorias
+			for(int i=0 ; i < 4 ; i++) 
+				rnd[i] = gen.nextInt(370)+1;
+			
+			// ler palavras (tamanho 4)
+			Arrays.sort(rnd);
+			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+				bufRead.skip((rnd[i]-adj) * 5);
+				String word = bufRead.readLine();
+				goalWords[i] = word;
+			}
+			input.close();
+			
+			input = new FileReader("words/word5.txt");
+			bufRead = new BufferedReader(input);
+	
+			// gerar 4 indexes para linhas aleatorias
+			for(int i=0 ; i < 4 ; i++) 
+				rnd[i]=gen.nextInt(370)+1;
+			
+			// ler palavras (tamanho 5)
+			Arrays.sort(rnd);
+			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+				bufRead.skip((rnd[i]-adj) * 6);
+				String word = bufRead.readLine();
+				goalWords[i+4] = word;
+			}
+			input.close();
+			
+			input = new FileReader("words/word6.txt");
+			bufRead = new BufferedReader(input);
+	
+			// gerar 4 indexes para linhas aleatorias
+			for(int i=0 ; i < 4 ; i++) 
+				rnd[i]=gen.nextInt(370)+1;
+			
+			// ler palavras (tamanho 6)
+			Arrays.sort(rnd);
+			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+				bufRead.skip((rnd[i]-adj) * 7);
+				String word = bufRead.readLine();
+				goalWords[i+8] = word;
+			}
+			input.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return goalWords;
 	}
 }
