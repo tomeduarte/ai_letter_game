@@ -2,6 +2,8 @@ package ai_letter_game;
 
 import javax.swing.text.html.HTMLDocument.Iterator;
 
+import ai_letter_game.AgentGameController.doTurnBehaviour;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -98,14 +100,28 @@ public class AgentPlayer extends MockAgent
 			
 			//		get INFORM: turn ended
 			//			start waitTurn or waitCFP
-			
-			System.out.println("CFP Behaviour: nothing to see here.."); 
-			
-//			if(Boolean.parseBoolean(info[0])) {
-//				addBehaviour(new waitTurnBehaviour());
-//			} else {
-//				addBehaviour(new waitCFPBehaviour());
-//			}
-		}
+			try {
+				ACLMessage msg = myAgent.blockingReceive();
+				int performative = msg.getPerformative();
+				String content = msg.getContent();
+				
+				switch(performative) {
+					case ACLMessage.INFORM:
+						// is it our turn?
+						if(content.equals("Main screen turn on.")) {
+							System.out.println(myAgent.getName() + " next up - my turn"); 
+							addBehaviour(new waitTurnBehaviour());
+						} else {
+							System.out.println(myAgent.getName() + " next up - CFP"); 
+							addBehaviour(new waitCFPBehaviour());
+						}
+						break;
+					default:
+						addBehaviour(new waitCFPBehaviour());
+						break;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}		}
 	}
 }

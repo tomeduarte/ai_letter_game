@@ -40,12 +40,12 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private JTextPane lblPlayer2;
 	private JTextPane lblPlayer3;
 	private JTextPane lblPlayer4;
-	private JComboBox comboPlayer1;
-	private JComboBox comboPlayer2;
-	private JComboBox comboPlayer3;
-	private JComboBox comboPlayer4;
-	private JButton btnStartGame;
-	private JButton btnStopGame;
+	protected JComboBox comboPlayer1;
+	protected JComboBox comboPlayer2;
+	protected JComboBox comboPlayer3;
+	protected JComboBox comboPlayer4;
+	protected JButton btnStartGame;
+	protected JButton btnStopGame;
 
 	/**
 	 * Create the frame.
@@ -225,24 +225,10 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		
 		if(action.equals("Start game!")) {
 			doLog("Starting game..");
-			// switch enabled action buttons
-			btnStartGame.setEnabled(false);
-			comboPlayer1.setEnabled(false);
-			comboPlayer2.setEnabled(false);
-			comboPlayer3.setEnabled(false);
-			comboPlayer4.setEnabled(false);
-			btnStopGame.setEnabled(true);
 			myAgent.startGame();
 			doLog("OK");
 		} else if(action.equals("Stop game")) {
 			doLog("Stopping game..");
-			// switch enabled action buttons
-			btnStopGame.setEnabled(false);
-			comboPlayer1.setEnabled(true);
-			comboPlayer2.setEnabled(true);
-			comboPlayer3.setEnabled(true);
-			comboPlayer4.setEnabled(true);
-			btnStartGame.setEnabled(true);
 			myAgent.stopGame();
 			doLog("OK");
 		}
