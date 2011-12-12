@@ -29,10 +29,10 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private JPanel contentPane;
 	private JScrollPane consoleLogScroll;
 	private JTextArea txtConsoleLog;
-	private JTextPane txtInfoPlayer1;
-	private JTextPane txtInfoPlayer2;
-	private JTextPane txtInfoPlayer3;
-	private JTextPane txtInfoPlayer4;
+	protected JTextPane txtInfoPlayer1;
+	protected JTextPane txtInfoPlayer2;
+	protected JTextPane txtInfoPlayer3;
+	protected JTextPane txtInfoPlayer4;
 	private JTextPane lblConsoleLog;
 	private JTextPane lblPlayerSelection;
 	private JTextPane lblInfoPlayer;
@@ -77,7 +77,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtInfoPlayer2, 116, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtInfoPlayer2, -25, SpringLayout.EAST, contentPane);
 		txtInfoPlayer2.setBackground(Color.LIGHT_GRAY);
-		txtInfoPlayer2.setText("Player 1 [50] aaaaaa olamun");
+		txtInfoPlayer2.setText("Player 2 [pontos] objectivo");
 		txtInfoPlayer2.setEditable(false);
 		contentPane.add(txtInfoPlayer2);
 		
@@ -86,7 +86,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, txtInfoPlayer4, -114, SpringLayout.NORTH, consoleLogScroll);
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtInfoPlayer4, -25, SpringLayout.EAST, contentPane);
 		txtInfoPlayer4.setBackground(Color.LIGHT_GRAY);
-		txtInfoPlayer4.setText("Player 1 [50] aaaaaa olamun");
+		txtInfoPlayer4.setText("Player 4 [pontos] objectivo");
 		txtInfoPlayer4.setEditable(false);
 		contentPane.add(txtInfoPlayer4);
 		
@@ -97,7 +97,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		sl_contentPane.putConstraint(SpringLayout.EAST, txtInfoPlayer3, -179, SpringLayout.EAST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, txtInfoPlayer3, 521, SpringLayout.WEST, contentPane);
 		txtInfoPlayer3.setBackground(Color.LIGHT_GRAY);
-		txtInfoPlayer3.setText("Player 1 [50] aaaaaa olamun");
+		txtInfoPlayer3.setText("Player 3 [pontos] objectivo");
 		txtInfoPlayer3.setEditable(false);
 		contentPane.add(txtInfoPlayer3);
 		
@@ -114,7 +114,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		txtConsoleLog.setBackground(Color.BLACK);
 		consoleLogScroll.setViewportView(txtConsoleLog);
 		txtInfoPlayer1.setBackground(Color.LIGHT_GRAY);
-		txtInfoPlayer1.setText("Player 1 [50] aaaaaa olamun");
+		txtInfoPlayer1.setText("Player 1 [pontos] objectivo");
 		txtInfoPlayer1.setEditable(false);
 		contentPane.add(txtInfoPlayer1);
 		

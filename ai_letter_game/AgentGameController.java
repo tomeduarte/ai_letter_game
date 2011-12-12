@@ -44,11 +44,14 @@ public class AgentGameController extends MockAgent {
 	private int currentPlayer;
 	
 	// game state
-	private final int startMoney = 5;
+	private final int startMoney = 10;
 	protected OneShotBehaviour currentBehaviour;
 	private int levels[] = { LEVEL1, LEVEL1, LEVEL1, LEVEL1 }; 
 	private boolean isPlaying[] = { true, true, true, true};
-	private int credits[] = { 14, 13, 12, 11 };
+	private int credits[] = { startMoney, startMoney, startMoney, startMoney };
+	private String requestLetter;
+	String[] goalWords;
+	String[] startingLetters;
 	
 	public AgentGameController() {
 		this.serviceDescriptionType = "controller" + hashCode();
@@ -103,19 +106,35 @@ public class AgentGameController extends MockAgent {
 		}
 
 		consoleLog("sending game start information to all players");
-		String[] goalWords = getGoalWords();
-		String[] startingLetters = getStartingLetters(goalWords);
+		goalWords = getGoalWords();
+		startingLetters = getStartingLetters(goalWords);
 		try {
 			for(int i=0; i<4; i++) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+4]+";"+goalWords[i+8]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
+				
+				String ui = "Player "+ (i+1) + " ["+ credits[i] +"] " + goalWords[i];
+				switch (i) {
+					case 0:
+						myGui.txtInfoPlayer1.setText(ui);	
+						break;
+					case 1:
+						myGui.txtInfoPlayer2.setText(ui);
+						break;
+					case 2:
+						myGui.txtInfoPlayer3.setText(ui);
+						break;
+					case 3:
+						myGui.txtInfoPlayer4.setText(ui);
+						break;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		myAddBehaviour(new startTurnBehaviour());
 	}
 	
@@ -205,18 +224,134 @@ public class AgentGameController extends MockAgent {
 								consoleLog(msg.getSender().getName()
 											+ " has leveled up and is now on level "
 											+ levels[currentPlayer] + ".");
+								
+								String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
+								switch (currentPlayer) {
+									case 0: myGui.txtInfoPlayer1.setText(ui); break;
+									case 1: myGui.txtInfoPlayer2.setText(ui); break;
+									case 2: myGui.txtInfoPlayer3.setText(ui); break;
+									case 3: myGui.txtInfoPlayer4.setText(ui); break;
+									default: break;
+								}
 							}
+						} else if(content.equals("I'll be outside playing.")) {
+							isPlaying[currentPlayer] = false;
 						}
+						
 						currentPlayer = nextPlayer;
 						if(activePlayersAvailable())
 							myAddBehaviour(new startTurnBehaviour());
 						else
 							stopGame();
 						break;
+					// REQUEST FOR PROPOSAL
+					case ACLMessage.REQUEST:
+							// save the letter
+							requestLetter = content;
+							// handle proposals
+							collectProposalsBehaviour cp = new collectProposalsBehaviour();
+							addBehaviour(cp);
+						break;
 					default: // invalid message, go for it again!
 						myAddBehaviour(new doTurnBehaviour());
 						break;
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	class collectProposalsBehaviour extends OneShotBehaviour {
+		private static final long serialVersionUID = 4921474044670600062L;
+		public void action() {		
+			try {
+				// ask for proposals
+				ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+				request.setContent(requestLetter);
+		
+				for(int i = 0; i < acPlayers.length; i++) {
+					if(i != currentPlayer)
+						request.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));			
+				}
+				send(request);
+		
+				// get proposals
+				int answers=0;
+				String proposals="";
+				while(answers < 3) {
+					ACLMessage proposalMessage = new ACLMessage(ACLMessage.PROPOSE);
+					proposalMessage = blockingReceive();
+					String proposal = proposalMessage.getContent();
+					// he wants to sell
+					if (!proposal.equals("Video is being routed to the main screen.")) {
+						proposals += proposalMessage.getSender().getName() + "#" + proposal + ";";
+					}
+					answers++;
+				}
+		
+				// send list of proposals to the current player
+				ACLMessage retrieve = new ACLMessage(ACLMessage.PROPOSE);
+				retrieve.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
+				retrieve.setContent(proposals);
+				send(retrieve);
+				
+				addBehaviour(new waitDecisionBehaviour());
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	class waitDecisionBehaviour extends OneShotBehaviour {
+		public void action() {
+			try {
+				// get player's decision
+				ACLMessage decisionMessage = myAgent.blockingReceive();
+				String proposal = decisionMessage.getContent();
+				int performative = decisionMessage.getPerformative();
+				
+				switch(performative) {
+					case ACLMessage.ACCEPT_PROPOSAL:
+						ACLMessage updateMessage = new ACLMessage(ACLMessage.INFORM);
+						
+						// update status
+						String[] details = proposal.split(";");
+						credits[currentPlayer] -= Integer.parseInt(details[1]);
+						credits[Integer.parseInt(""+details[0].charAt(6))-1] += Integer.parseInt(details[1]);
+						// buyer
+						updateMessage.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
+						updateMessage.setContent("DELETE;"+details[1]+";"+details[2]);
+						send(updateMessage);
+						String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
+						switch (currentPlayer) {
+							case 0: myGui.txtInfoPlayer1.setText(ui); break;
+							case 1: myGui.txtInfoPlayer2.setText(ui); break;
+							case 2: myGui.txtInfoPlayer3.setText(ui); break;
+							case 3: myGui.txtInfoPlayer4.setText(ui); break;
+							default: break;
+						}
+						// seller
+						updateMessage.addReceiver(new AID(details[0], AID.ISLOCALNAME));
+						updateMessage.setContent("UPDATE;"+details[1]+";"+details[2]);
+						send(updateMessage);
+						System.out.println("Accepted proposal: "+proposal);
+						int player = Integer.parseInt(""+details[0].charAt(6))-1;
+						String ui2 = "Player "+ (player+1) + " ["+ credits[player] +"] " + goalWords[player];
+						switch (player) {
+							case 0: myGui.txtInfoPlayer1.setText(ui2); break;
+							case 1: myGui.txtInfoPlayer2.setText(ui2); break;
+							case 2: myGui.txtInfoPlayer3.setText(ui2); break;
+							case 3: myGui.txtInfoPlayer4.setText(ui2); break;
+							default: break;
+						}
+						break;
+					case ACLMessage.REJECT_PROPOSAL:
+						addBehaviour(new doTurnBehaviour());
+						break;
+					default:
+						break;
+				}
+				myAddBehaviour(new doTurnBehaviour());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -283,13 +418,13 @@ public class AgentGameController extends MockAgent {
             int randPicker = (int)(Math.random()*characters.size());
             output.append(characters.remove(randPicker));
         }
-		String[] startingLetters = output.toString().split("(?<=\\G.{15})");
-		return startingLetters;
+		String[] sletters = output.toString().split("(?<=\\G.{15})");
+		return sletters;
 	}
 
 	private String[] getGoalWords() {
 		
-		String[] goalWords = new String[12];
+		String[] gwords = new String[12];
 		int[] rnd = new int[4];
 		Random gen = new Random();
 
@@ -306,7 +441,7 @@ public class AgentGameController extends MockAgent {
 			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 5);
 				String word = bufRead.readLine();
-				goalWords[i] = word;
+				gwords[i] = word;
 			}
 			input.close();
 			
@@ -322,7 +457,7 @@ public class AgentGameController extends MockAgent {
 			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 6);
 				String word = bufRead.readLine();
-				goalWords[i+4] = word;
+				gwords[i+4] = word;
 			}
 			input.close();
 			
@@ -338,13 +473,13 @@ public class AgentGameController extends MockAgent {
 			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 7);
 				String word = bufRead.readLine();
-				goalWords[i+8] = word;
+				gwords[i+8] = word;
 			}
 			input.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return goalWords;
+		return gwords;
 	}
 }
