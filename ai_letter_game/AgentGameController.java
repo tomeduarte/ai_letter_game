@@ -26,6 +26,9 @@ public class AgentGameController extends MockAgent {
 	private final int LEVEL1 = 1;
 	private final int LEVEL2 = 2;
 	private final int LEVEL3 = 3;
+	private final int LEVEL2_SCORE = 10;
+	private final int LEVEL3_SCORE = 50;
+	private final int FINAL_SCORE = 200;
 	
 	// current player
 	private int currentPlayer;
@@ -34,6 +37,8 @@ public class AgentGameController extends MockAgent {
 	private final int startMoney = 5;
 	protected OneShotBehaviour currentBehaviour;
 	private int levels[] = { LEVEL1, LEVEL1, LEVEL1, LEVEL1 }; 
+	private boolean isPlaying[] = { true, true, true, true};
+	private int credits[] = { 14, 13, 12, 11 };
 	
 	public AgentGameController() {
 		this.serviceDescriptionType = "controller" + hashCode();
@@ -135,7 +140,7 @@ public class AgentGameController extends MockAgent {
 	class startTurnBehaviour extends OneShotBehaviour {
 		public void action() {
 			try {
-				String s = "A new round has started, Player" + currentPlayer + " is playing.";
+				String s = "A new round has started, Player" + (currentPlayer+1) + " is playing.";
 				consoleLog(s);
 				System.out.println(s);
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -157,9 +162,11 @@ public class AgentGameController extends MockAgent {
 				
 				switch(performative) {
 					case ACLMessage.INFORM:
-						int nextPlayer = (currentPlayer == 3) ? 0 : currentPlayer+1;
+						int nextPlayer = getNextPlayer();
 						// notify every player of turn switch
 						for(int i=0; i<4; i++) {
+							if(!isPlaying[i])
+								continue;
 							ACLMessage msg2 = new ACLMessage(ACLMessage.INFORM);
 							msg2.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 							if(nextPlayer == i)
@@ -168,25 +175,31 @@ public class AgentGameController extends MockAgent {
 								msg2.setContent("You have no chance to survive make your time.");
 							send(msg2);
 						}
+						
 						// end turn
 						if(content.equals("Treasure what little time remains of your lives.")) {
 							consoleLog(msg.getSender() + "passed turn.");
-							currentPlayer = nextPlayer;
-							myAddBehaviour(new startTurnBehaviour());
 						} else if(content.equals("all your base are belong to us")) {
 							if(levels[currentPlayer] == LEVEL3) {
-								consoleLog(msg.getSender() + " has won the game.");
-								stopGame();
-								return;
+								credits[currentPlayer] += FINAL_SCORE;
+								isPlaying[currentPlayer] = false;
+								consoleLog(msg.getSender().getName() + " has completed all levels.");
+								
+								if(!activePlayersAvailable())
+									declareWinner();
 							} else {
+								credits[currentPlayer] += (levels[currentPlayer] == LEVEL1) ? LEVEL2_SCORE : LEVEL3_SCORE;
 								levels[currentPlayer] = (levels[currentPlayer] == LEVEL1) ? LEVEL2 : LEVEL3;
-								consoleLog(msg.getSender()
+								consoleLog(msg.getSender().getName()
 											+ " has leveled up and is now on level "
 											+ levels[currentPlayer] + ".");
-								currentPlayer = nextPlayer;
-								myAddBehaviour(new startTurnBehaviour());
 							}
 						}
+						currentPlayer = nextPlayer;
+						if(activePlayersAvailable())
+							myAddBehaviour(new startTurnBehaviour());
+						else
+							stopGame();
 						break;
 					default: // invalid message, go for it again!
 						myAddBehaviour(new doTurnBehaviour());
@@ -207,4 +220,39 @@ public class AgentGameController extends MockAgent {
 		addBehaviour(behaviour);
 	}
 	
+	private int getNextPlayer() {
+		int nextPlayer = (currentPlayer == 3) ? 0 : currentPlayer+1;
+		if(!isPlaying[nextPlayer]) {
+			int counter = 1;
+			do {
+				counter++;
+				if(nextPlayer == 3)
+					nextPlayer = 0;
+				else
+					nextPlayer++;
+			} while (counter < 3 && !isPlaying[nextPlayer]);
+		}
+		
+		return nextPlayer;
+	}
+	
+	private boolean activePlayersAvailable() {
+		int counter = 0;
+		for(int i = 0; i < 4; i++) {
+			if (isPlaying[i])
+				counter++;
+		}
+		return (counter >= 2);
+	}
+	
+	private void declareWinner() {
+		int winner = 0;
+		
+		for(int i = 0; i < 4; i++) {
+			if (credits[i] > credits[winner])
+				winner = i;
+		}
+		
+		consoleLog("== Player" + winner+1 + " has won the game with " + credits[winner] + " credits! ==");
+	}
 }
