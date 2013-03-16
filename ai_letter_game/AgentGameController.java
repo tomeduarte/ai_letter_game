@@ -51,7 +51,11 @@ public class AgentGameController extends MockAgent {
 	private boolean isPlaying[] = { true, true, true, true};
 	private int credits[] = { startMoney, startMoney, startMoney, startMoney };
 	private String requestLetter;
-	String[] goalWords;
+	String[] goalWords = {
+							"cold", "mind", "fire", "word",
+							"blind", "stuff", "upset", "freak",
+							"hustle", "winter", "around", "listen"
+						 };
 	String[] startingLetters;
 	
 	public AgentGameController() {
@@ -106,7 +110,7 @@ public class AgentGameController extends MockAgent {
 		}
 
 		consoleLog("sending game start information to all players");
-		goalWords = getGoalWords();
+//		goalWords = getGoalWords();
 		startingLetters = getStartingLetters(goalWords);
 		try {
 			for(int i=0; i<maxPlayers; i++) {
@@ -406,6 +410,16 @@ public class AgentGameController extends MockAgent {
 	}
 	
 	private String[] getStartingLetters(String[] words) {
+		String letters = new String();
+		for(int i=0; i < words.length; i++) {
+			letters += words[i];
+		}
+
+		String[] sletters = {letters, letters, letters, letters};
+
+		return sletters;
+	}
+	private String[] complexgetStartingLetters(String[] words) {
 		String letters = new String();
 		
 		for(int i=0; i < words.length; i++) {
