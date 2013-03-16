@@ -42,6 +42,7 @@ public class AgentGameController extends MockAgent {
 	
 	// current player
 	private int currentPlayer;
+	private final int maxPlayers = 2;
 	
 	// game state
 	private final int startMoney = 10;
@@ -62,7 +63,7 @@ public class AgentGameController extends MockAgent {
 		myGui.setVisible(true);
 		
 		// Initialize the state machine
-		currentPlayer = 0;
+		currentPlayer = 1;
 	}
 
 	@Override
@@ -86,10 +87,9 @@ public class AgentGameController extends MockAgent {
 		myGui.btnStopGame.setEnabled(true);
 
 		// create the players
-		currentPlayer = 0;
 		try {
-			acPlayers = new AgentController[4];
-			for(int i=0; i < 4; i++) {
+			acPlayers = new AgentController[maxPlayers];
+			for(int i=0; i < maxPlayers; i++) {
 				acPlayers[i] = container.createNewAgent("Player"+(i+1), "ai_letter_game.AgentPlayer", null);
 				acPlayers[i].start();
 			}
@@ -109,9 +109,10 @@ public class AgentGameController extends MockAgent {
 		goalWords = getGoalWords();
 		startingLetters = getStartingLetters(goalWords);
 		try {
-			for(int i=0; i<4; i++) {
+			for(int i=0; i<maxPlayers; i++) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
+				// starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
 				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+4]+";"+goalWords[i+8]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
 				
@@ -144,13 +145,13 @@ public class AgentGameController extends MockAgent {
 		
 		// remove the players
 		try {
-			for(int i=0; i<4; i++)
+			for(int i=0; i<maxPlayers; i++)
 				acPlayers[i].kill();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
 			if (acPlayers != null) { 
-				for(int i=0; i<4; i++) {
+				for(int i=0; i<maxPlayers; i++) {
 					acPlayers[i] = null;
 				}
 				acPlayers = null;
@@ -195,7 +196,7 @@ public class AgentGameController extends MockAgent {
 					case ACLMessage.INFORM:
 						int nextPlayer = getNextPlayer();
 						// notify every player of turn switch
-						for(int i=0; i<4; i++) {
+						for(int i=0; i<maxPlayers; i++) {
 							if(!isPlaying[i])
 								continue;
 							ACLMessage msg2 = new ACLMessage(ACLMessage.INFORM);
@@ -368,16 +369,17 @@ public class AgentGameController extends MockAgent {
 	}
 	
 	private int getNextPlayer() {
-		int nextPlayer = (currentPlayer == 3) ? 0 : currentPlayer+1;
+		int offsetMaxPlayers = maxPlayers-1;
+		int nextPlayer = (currentPlayer == offsetMaxPlayers) ? 0 : currentPlayer+1;
 		if(!isPlaying[nextPlayer]) {
 			int counter = 1;
 			do {
 				counter++;
-				if(nextPlayer == 3)
+				if(nextPlayer == offsetMaxPlayers)
 					nextPlayer = 0;
 				else
 					nextPlayer++;
-			} while (counter < 3 && !isPlaying[nextPlayer]);
+			} while (counter < offsetMaxPlayers && !isPlaying[nextPlayer]);
 		}
 		
 		return nextPlayer;
@@ -385,7 +387,7 @@ public class AgentGameController extends MockAgent {
 	
 	private boolean activePlayersAvailable() {
 		int counter = 0;
-		for(int i = 0; i < 4; i++) {
+		for(int i = 0; i < maxPlayers; i++) {
 			if (isPlaying[i])
 				counter++;
 		}
@@ -395,7 +397,7 @@ public class AgentGameController extends MockAgent {
 	private void declareWinner() {
 		int winner = 0;
 		
-		for(int i = 0; i < 4; i++) {
+		for(int i = 0; i < maxPlayers; i++) {
 			if (credits[i] > credits[winner])
 				winner = i;
 		}
