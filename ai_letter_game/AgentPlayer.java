@@ -220,6 +220,7 @@ public class AgentPlayer extends MockAgent
 						ACLMessage message = new ACLMessage(ACLMessage.PROPOSE);
 						message.addReceiver(new AID("gameController", AID.ISLOCALNAME));
 						/**
+						 * PRICES:
 						 * ETAO 6
 						 * INSHRDL 4
 						 * CUMWFG 2
