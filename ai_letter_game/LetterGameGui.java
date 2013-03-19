@@ -1,22 +1,19 @@
 package ai_letter_game;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JSeparator;
 import javax.swing.JTextPane;
 import javax.swing.JTextArea;
-import java.awt.Color;
-import javax.swing.SpringLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.UIManager;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import javax.swing.ScrollPaneConstants;
-import java.awt.Rectangle;
+
+import net.miginfocom.swing.MigLayout;
+
 
 public class LetterGameGui extends JFrame implements ActionListener{
 
@@ -57,10 +54,71 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		myAgent = agent;
 		
 		setTitle("A.I. Letter Game");
-		setResizable(false);
-		setAlwaysOnTop(true);
+		setResizable(true);
+		setAlwaysOnTop(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(260, 100, 800, 600);
+		//setBounds(260, 100, 800, 600);
+		setExtendedState( getExtendedState()|JFrame.MAXIMIZED_BOTH );
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		MigLayout layout 	= new MigLayout("debug", "[grow, fill]", "[]");
+		JPanel topPanel 	= new JPanel(layout);
+		JPanel bottomPanel 	= new JPanel(layout);
+		JPanel globalPanel 	= new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
+
+		// ==== TOP PANEL ====
+		topPanel.add(new JLabel(""), 			"sg delete");
+		topPanel.add(new JLabel("NOME"), 		"gap unrel, sg name");
+		topPanel.add(new JLabel("PALAVRA"), 	"gap unrel, sg palavra");
+		topPanel.add(new JLabel("LETRAS"), 		"gap unrel, sg letters");
+		topPanel.add(new JLabel("PONTOS"), 		"gap unrel, sg points");
+		topPanel.add(new JLabel("NÍVEL"), 		"gap unrel, sg level");
+		topPanel.add(new JLabel("A JOGAR?"), 	"gap unrel, sg playing, wrap");
+
+		// example data only
+		topPanel.add(new JButton("remover"),		"sg delete");
+		topPanel.add(new JLabel("name"), 			"gap unrel, sg name");
+		topPanel.add(new JLabel("word"), 			"gap unrel, sg word");
+		topPanel.add(new JLabel("lotsoflettersyh"), "gap unrel, sg letters");
+		topPanel.add(new JLabel("points"), 			"gap unrel, sg points");
+		topPanel.add(new JLabel("level"), 			"gap unrel, sg level");
+		topPanel.add(new JLabel("playing?"), 		"gap unrel, sg playing, wrap");
+
+		// ==== BOTTOM PANEL ====
+		// number of players information
+		JTextPane numberOfPlayers = new JTextPane();
+		numberOfPlayers.setText("4");
+		JTextPane numberOfPlayersLegend = new JTextPane();
+		numberOfPlayersLegend.setText("JOGADORES");
+
+		// add new player form
+		JComboBox newPlayerBehaviourCombo = new JComboBox();
+		JButton newPlayerAddButton = new JButton("ADICIONAR");
+
+		// start and stop buttons
+		JButton startGameButton = new JButton("Start game!");
+		startGameButton.addActionListener(this);
+		JButton stopGameButton = new JButton("Stop game");
+		stopGameButton.addActionListener(this);
+		stopGameButton.setEnabled(false);
+
+		// add elements to the bottom layout panel
+		bottomPanel.add(numberOfPlayers, "center, flowy, split 2");
+		bottomPanel.add(numberOfPlayersLegend, "center, width pref!");
+		bottomPanel.add(newPlayerBehaviourCombo, "center, flowy, split 2");
+		bottomPanel.add(newPlayerAddButton, "center");
+		bottomPanel.add(startGameButton, "gap unrel, growy");
+		bottomPanel.add(stopGameButton, "growy");
+
+		// ready, set, go!
+		globalPanel.add(new JScrollPane(topPanel), "growy, wrap");
+        globalPanel.add(new JSeparator(), "wrap");
+        globalPanel.add(bottomPanel);
+		getContentPane().add(globalPanel);
+		pack();
+		setLocationRelativeTo(null);
+
+		/*
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.LIGHT_GRAY);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -218,6 +276,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnStopGame, 77, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStopGame, 0, SpringLayout.SOUTH, comboPlayer3);
 		contentPane.add(btnStopGame);
+		*/
 	}
 
 	/**
