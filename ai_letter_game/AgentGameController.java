@@ -47,9 +47,9 @@ public class AgentGameController extends MockAgent {
 	// game state
 	private final int startMoney = 10;
 	protected OneShotBehaviour currentBehaviour;
-	private int levels[] = { LEVEL1, LEVEL1, LEVEL1, LEVEL1 }; 
-	private boolean isPlaying[] = { true, true, true, true};
-	private int credits[] = { startMoney, startMoney, startMoney, startMoney };
+	private int levels[];
+	private int credits[];
+	private boolean isPlaying[];
 	private String requestLetter;
 	String[] simpleGoalWords = {
 							"cold", "mind", "fire", "word",
@@ -93,10 +93,22 @@ public class AgentGameController extends MockAgent {
 
 		// create the players
 		try {
-			acPlayers = new AgentController[maxPlayers];
+			// holders for agents and game state
+			acPlayers 	= new AgentController[maxPlayers];
+			levels		= new int[maxPlayers];
+			credits		= new int[maxPlayers];
+			isPlaying 	= new boolean[maxPlayers];
+
 			for(int i=0; i < maxPlayers; i++) {
+				// create AgentPlayer
 				acPlayers[i] = container.createNewAgent("Player"+(i+1), "ai_letter_game.AgentPlayer", null);
 				acPlayers[i].start();
+
+				// init game state
+				levels[i]	 = LEVEL1;
+				credits[i]	 = startMoney;
+				isPlaying[i] = true;
+
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -204,6 +216,8 @@ public class AgentGameController extends MockAgent {
 						for(int i=0; i<maxPlayers; i++) {
 							if(!isPlaying[i])
 								continue;
+
+							debugLog("Notifying player " + i+1 + "of new turn.");
 							ACLMessage msg2 = new ACLMessage(ACLMessage.INFORM);
 							msg2.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 							if(nextPlayer == i)
@@ -415,12 +429,14 @@ public class AgentGameController extends MockAgent {
 	}
 	
 	private String[] getStartingLetters(String[] words) {
+		String[] sletters = new String[maxPlayers];
 		String letters = new String();
-		for(int i=0; i < words.length; i++) {
-			letters += words[i];
-		}
 
-		String[] sletters = {letters, letters, letters, letters};
+		for(int i=0; i < words.length; i++)
+			letters += words[i];
+
+		for(int i=0; i < maxPlayers; i++)
+			sletters[i] = letters;
 
 		return sletters;
 	}
