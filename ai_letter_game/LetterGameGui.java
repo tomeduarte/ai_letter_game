@@ -21,6 +21,9 @@ import java.awt.Rectangle;
 public class LetterGameGui extends JFrame implements ActionListener{
 
 	private static final long serialVersionUID = -8092527406687437334L;
+	private static final int LOG_INFO = 0;
+	private static final int LOG_DEBUG = 1;
+	private static int logLevel = LOG_DEBUG;
 	private static AgentGameController myAgent; // Reference to the agent class
 
 	/**
@@ -240,7 +243,15 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	protected void consoleLog(String message) {
 		txtConsoleLog.append("\n" + message);
 	}
-	
+
+	/**
+	 * Log debug messages to the console, if logLevel is set to LOG_DEBUG
+	 */
+	protected void debugLog(String message) {
+		if(logLevel == LOG_DEBUG)
+			consoleLog("[DEBUG] " + message);
+	}
+
 	/**
 	 * Log messages from the UI
 	 */

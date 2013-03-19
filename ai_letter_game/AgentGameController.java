@@ -368,6 +368,10 @@ public class AgentGameController extends MockAgent {
 		myGui.consoleLog("[GAME] " + message);
 	}
 	
+	private void debugLog(String message) {
+		myGui.debugLog(message);
+	}
+	
 	private void myAddBehaviour(OneShotBehaviour behaviour) {
 		currentBehaviour = behaviour;
 		addBehaviour(behaviour);
