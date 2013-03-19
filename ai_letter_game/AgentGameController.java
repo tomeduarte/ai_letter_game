@@ -428,7 +428,7 @@ public class AgentGameController extends MockAgent {
 		consoleLog("== Player" + (winner+1) + " has won the game with " + credits[winner] + " credits! ==");
 	}
 	
-	private String[] getStartingLetters(String[] words) {
+	private String[] old_getStartingLetters(String[] words) {
 		String[] sletters = new String[maxPlayers];
 		String letters = new String();
 
@@ -440,22 +440,35 @@ public class AgentGameController extends MockAgent {
 
 		return sletters;
 	}
-	private String[] complexgetStartingLetters(String[] words) {
+	private String[] getStartingLetters(String[] words) {
 		String letters = new String();
-		
-		for(int i=0; i < words.length; i++) {
+
+		// concat all words into a string
+		for(int i=0; i < words.length; i++)
 			letters += words[i];
-		}
+
+		// build a character array from that string
+		// e.g every letter is an item of this array
 		List<Character> characters = new ArrayList<Character>();
-        for(char c:letters.toCharArray()){
+        for(char c:letters.toCharArray())
             characters.add(c);
-        }      
+
+        // randomly order the characters
         StringBuilder output = new StringBuilder(letters.length());
         while(characters.size()!=0){
             int randPicker = (int)(Math.random()*characters.size());
             output.append(characters.remove(randPicker));
         }
-		String[] sletters = output.toString().split("(?<=\\G.{15})");
+
+        // split the random characters array by players
+        // total characters = maxPlayers x (4-letter words + 5-letter words + 6-letter words)
+        int splitNumber = (maxPlayers * (4 + 5 + 6)) / maxPlayers;
+        String splitRegex = "(?<=\\G.{" + splitNumber + "})";
+		String[] sletters = output.toString().split(splitRegex);
+
+		debugLog("== AgentGameController::getStartingLetters() ==");
+		debugLog(Arrays.toString(sletters));
+
 		return sletters;
 	}
 
@@ -505,8 +518,6 @@ public class AgentGameController extends MockAgent {
 			for(int i=0 ; i < maxPlayers ; i++)
 				rnd[i]=gen.nextInt(370)+1;
 
-			debugLog(Arrays.toString(rnd));
-			
 			// ler palavras (tamanho 6)
 			Arrays.sort(rnd);
 			for(int i=0,adj=0; i < maxPlayers; adj=rnd[i++]) {
@@ -519,6 +530,7 @@ public class AgentGameController extends MockAgent {
 			e.printStackTrace();
 		}
 		
+		debugLog("== AgentGameController::getGoalWords() ==");
 		debugLog(Arrays.toString(gwords));
 
 		return gwords;
