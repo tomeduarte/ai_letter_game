@@ -462,9 +462,7 @@ public class AgentGameController extends MockAgent {
 
         // split the random characters array by players
         // total characters = maxPlayers x (4-letter words + 5-letter words + 6-letter words)
-        int splitNumber = (maxPlayers * (4 + 5 + 6)) / maxPlayers;
-        String splitRegex = "(?<=\\G.{" + splitNumber + "})";
-		String[] sletters = output.toString().split(splitRegex);
+		String[] sletters = output.toString().split("(?<=\\G.{15})");
 
 		debugLog("== AgentGameController::getStartingLetters() ==");
 		debugLog(Arrays.toString(sletters));
