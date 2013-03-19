@@ -42,7 +42,7 @@ public class AgentGameController extends MockAgent {
 	
 	// current player
 	private int currentPlayer;
-	private final int maxPlayers = 4;
+	private final int maxPlayers = 15;
 	
 	// game state
 	private final int startMoney = 10;
@@ -478,7 +478,7 @@ public class AgentGameController extends MockAgent {
 			for(int i=0,adj=0; i < maxPlayers ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 6);
 				String word = bufRead.readLine();
-				gwords[i+maxPlayers] = word;
+				gwords[maxPlayers + i] = word;
 			}
 			input.close();
 			
@@ -488,19 +488,23 @@ public class AgentGameController extends MockAgent {
 			// gerar indexes para linhas aleatorias
 			for(int i=0 ; i < maxPlayers ; i++)
 				rnd[i]=gen.nextInt(370)+1;
+
+			debugLog(Arrays.toString(rnd));
 			
 			// ler palavras (tamanho 6)
 			Arrays.sort(rnd);
 			for(int i=0,adj=0; i < maxPlayers; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 7);
 				String word = bufRead.readLine();
-				gwords[i+maxPlayers*2] = word;
+				gwords[maxPlayers*2 + i] = word;
 			}
 			input.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
+		debugLog(Arrays.toString(gwords));
+
 		return gwords;
 	}
 }
