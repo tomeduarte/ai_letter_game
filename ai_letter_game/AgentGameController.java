@@ -42,7 +42,7 @@ public class AgentGameController extends MockAgent {
 	
 	// current player
 	private int currentPlayer;
-	private final int maxPlayers = 2;
+	private final int maxPlayers = 4;
 	
 	// game state
 	private final int startMoney = 10;
@@ -51,11 +51,12 @@ public class AgentGameController extends MockAgent {
 	private boolean isPlaying[] = { true, true, true, true};
 	private int credits[] = { startMoney, startMoney, startMoney, startMoney };
 	private String requestLetter;
-	String[] goalWords = {
+	String[] simpleGoalWords = {
 							"cold", "mind", "fire", "word",
 							"blind", "stuff", "upset", "freak",
 							"hustle", "winter", "around", "listen"
 						 };
+	String[] goalWords;
 	String[] startingLetters;
 	
 	public AgentGameController() {
@@ -110,14 +111,14 @@ public class AgentGameController extends MockAgent {
 		}
 
 		consoleLog("sending game start information to all players");
-//		goalWords = getGoalWords();
+		goalWords = getGoalWords();
 		startingLetters = getStartingLetters(goalWords);
 		try {
 			for(int i=0; i<maxPlayers; i++) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 				// starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
-				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+4]+";"+goalWords[i+8]+";"+startingLetters[i]+";"+(currentPlayer == i));
+				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+maxPlayers]+";"+goalWords[i+maxPlayers]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
 				
 				String ui = "Player "+ (i+1) + " ["+ credits[i] +"] " + goalWords[i];
@@ -440,21 +441,21 @@ public class AgentGameController extends MockAgent {
 
 	private String[] getGoalWords() {
 		
-		String[] gwords = new String[12];
-		int[] rnd = new int[4];
+		String[] gwords = new String[maxPlayers*3];
+		int[] rnd = new int[maxPlayers];
 		Random gen = new Random();
 
 		try {
 			FileReader input = new FileReader("words/word4.txt");
 			BufferedReader bufRead = new BufferedReader(input);
 	
-			// gerar 4 indexes para linhas aleatorias
-			for(int i=0 ; i < 4 ; i++) 
+			// gerar indexes para linhas aleatorias
+			for(int i=0 ; i < maxPlayers ; i++)
 				rnd[i] = gen.nextInt(370)+1;
 			
 			// ler palavras (tamanho 4)
 			Arrays.sort(rnd);
-			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+			for(int i=0, adj=0; i < maxPlayers; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 5);
 				String word = bufRead.readLine();
 				gwords[i] = word;
@@ -464,32 +465,32 @@ public class AgentGameController extends MockAgent {
 			input = new FileReader("words/word5.txt");
 			bufRead = new BufferedReader(input);
 	
-			// gerar 4 indexes para linhas aleatorias
-			for(int i=0 ; i < 4 ; i++) 
+			// gerar indexes para linhas aleatorias
+			for(int i=0 ; i < maxPlayers ; i++)
 				rnd[i]=gen.nextInt(370)+1;
 			
 			// ler palavras (tamanho 5)
 			Arrays.sort(rnd);
-			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+			for(int i=0,adj=0; i < maxPlayers ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 6);
 				String word = bufRead.readLine();
-				gwords[i+4] = word;
+				gwords[i+maxPlayers] = word;
 			}
 			input.close();
 			
 			input = new FileReader("words/word6.txt");
 			bufRead = new BufferedReader(input);
 	
-			// gerar 4 indexes para linhas aleatorias
-			for(int i=0 ; i < 4 ; i++) 
+			// gerar indexes para linhas aleatorias
+			for(int i=0 ; i < maxPlayers ; i++)
 				rnd[i]=gen.nextInt(370)+1;
 			
 			// ler palavras (tamanho 6)
 			Arrays.sort(rnd);
-			for(int i=0,adj=0; i < 4 ; adj=rnd[i++]) {
+			for(int i=0,adj=0; i < maxPlayers; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 7);
 				String word = bufRead.readLine();
-				gwords[i+8] = word;
+				gwords[i+maxPlayers*2] = word;
 			}
 			input.close();
 		} catch (Exception e) {
