@@ -2,6 +2,9 @@ package ai_letter_game;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -18,53 +21,54 @@ import net.miginfocom.swing.MigLayout;
 public class LetterGameGui extends JFrame implements ActionListener{
 
 	private static final long serialVersionUID = -8092527406687437334L;
+
+	// Logging
 	private static final int LOG_INFO = 0;
 	private static final int LOG_DEBUG = 1;
 	private static int logLevel = LOG_DEBUG;
-	private static AgentGameController myAgent; // Reference to the agent class
 
-	/**
-	 * UI components
-	 */
-	private JPanel contentPane;
-	private JScrollPane consoleLogScroll;
-	private JTextArea txtConsoleLog;
-	protected JTextPane txtInfoPlayer1;
-	protected JTextPane txtInfoPlayer2;
-	protected JTextPane txtInfoPlayer3;
-	protected JTextPane txtInfoPlayer4;
-	private JTextPane lblConsoleLog;
-	private JTextPane lblPlayerSelection;
-	private JTextPane lblInfoPlayer;
-	private JTextPane lblPlayer1;
-	private JTextPane lblPlayer2;
-	private JTextPane lblPlayer3;
-	private JTextPane lblPlayer4;
-	protected JComboBox comboPlayer1;
-	protected JComboBox comboPlayer2;
-	protected JComboBox comboPlayer3;
-	protected JComboBox comboPlayer4;
-	protected JButton btnStartGame;
-	protected JButton btnStopGame;
+	// GameController Relay Object
+	private static AgentGameController myAgent;
+
+	// UI objects
+	MigLayout layout;
+	JPanel globalPanel;
+	JPanel topPanel;
+	JPanel bottomPanel;
+	JScrollPane topScrollPane;
+
+	// agents information
+	List<AgentInformation> agentsInformation;
 
 	/**
 	 * Create the frame.
 	 */
 	public LetterGameGui(AgentGameController agent) {
-		myAgent = agent;
+		setVisible(false);
 		
-		setTitle("A.I. Letter Game");
-		setResizable(true);
-		setAlwaysOnTop(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//setBounds(260, 100, 800, 600);
-		setExtendedState( getExtendedState()|JFrame.MAXIMIZED_BOTH );
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// agent object which is a relay for game actions
+		this.myAgent = agent;
 
-		MigLayout layout 	= new MigLayout("debug", "[grow, fill]", "[]");
-		JPanel topPanel 	= new JPanel(layout);
-		JPanel bottomPanel 	= new JPanel(layout);
-		JPanel globalPanel 	= new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
+		// setup the GUI elements
+		setupGUILayout();
+
+		// setup initial game state		
+		setupDefaultGamestate();
+
+		// update display
+		showGUI();
+	}
+
+	/**
+	 * Setup GUI elements and holder objects for dynamic content.
+	 */
+	private void setupGUILayout() {
+
+		// ==== LAYOUT ====
+		this.layout 	  = new MigLayout("debug", "[grow, fill]", "[]");
+		this.topPanel 	  = new JPanel(layout);
+		this.bottomPanel  = new JPanel(layout);
+		this.globalPanel  = new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
 
 		// ==== TOP PANEL ====
 		topPanel.add(new JLabel(""), 			"sg delete");
@@ -75,25 +79,17 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		topPanel.add(new JLabel("NÍVEL"), 		"gap unrel, sg level");
 		topPanel.add(new JLabel("A JOGAR?"), 	"gap unrel, sg playing, wrap");
 
-		// example data only
-		topPanel.add(new JButton("remover"),		"sg delete");
-		topPanel.add(new JLabel("name"), 			"gap unrel, sg name");
-		topPanel.add(new JLabel("word"), 			"gap unrel, sg word");
-		topPanel.add(new JLabel("lotsoflettersyh"), "gap unrel, sg letters");
-		topPanel.add(new JLabel("points"), 			"gap unrel, sg points");
-		topPanel.add(new JLabel("level"), 			"gap unrel, sg level");
-		topPanel.add(new JLabel("playing?"), 		"gap unrel, sg playing, wrap");
-
 		// ==== BOTTOM PANEL ====
 		// number of players information
 		JTextPane numberOfPlayers = new JTextPane();
-		numberOfPlayers.setText("4");
+		numberOfPlayers.setText("");
 		JTextPane numberOfPlayersLegend = new JTextPane();
 		numberOfPlayersLegend.setText("JOGADORES");
 
 		// add new player form
 		JComboBox newPlayerBehaviourCombo = new JComboBox();
 		JButton newPlayerAddButton = new JButton("ADICIONAR");
+		newPlayerAddButton.addActionListener(this);
 
 		// start and stop buttons
 		JButton startGameButton = new JButton("Start game!");
@@ -110,15 +106,14 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		bottomPanel.add(startGameButton, "gap unrel, growy");
 		bottomPanel.add(stopGameButton, "growy");
 
-		// ready, set, go!
-		globalPanel.add(new JScrollPane(topPanel), "growy, wrap");
+		// append to global panel
+		this.topScrollPane = new JScrollPane(topPanel);
+		globalPanel.add(this.topScrollPane, "growy, wrap");
         globalPanel.add(new JSeparator(), "wrap");
-        globalPanel.add(bottomPanel);
-		getContentPane().add(globalPanel);
-		pack();
-		setLocationRelativeTo(null);
-
-		/*
+        globalPanel.add(this.bottomPanel);
+		getContentPane().add(this.globalPanel);
+		
+		/* OLD GUI CODE
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.LIGHT_GRAY);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -279,6 +274,25 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		*/
 	}
 
+
+	/**
+	 * Update window settings to be visible 
+	 */
+	private void showGUI() {
+		// window settings
+		setTitle("A.I. Letter Game");
+		setResizable(true);
+		setAlwaysOnTop(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setBounds(260, 100, 800, 600);
+		setExtendedState( getExtendedState()|JFrame.MAXIMIZED_BOTH );
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		// display window
+		pack();
+		setLocationRelativeTo(null);
+	}
+
 	/**
 	 * Handle user actions
 	 */
@@ -293,6 +307,8 @@ public class LetterGameGui extends JFrame implements ActionListener{
 			doLog("Stopping game..");
 			myAgent.stopGame();
 			doLog("OK");
+		} else if (action.equals("ADICIONAR")) {
+			addNewPlayer();
 		}
 	}
 	
@@ -300,7 +316,8 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	 *  Log messages to the Console Log
 	 */
 	protected void consoleLog(String message) {
-		txtConsoleLog.append("\n" + message);
+		//txtConsoleLog.append("\n" + message);
+		System.out.println(message);
 	}
 
 	/**
@@ -317,4 +334,41 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private void doLog(String message) {
 		consoleLog("[UI] " + message);
 	}
+	private void doLog(String message, boolean debug) {
+		if(debug == true)
+			consoleLog("[UI DEBUG] " + message);
+	}
+
+	/**
+	 * Setup initial gamestate (two players, no more information)
+	 */
+	private void setupDefaultGamestate() {
+		agentsInformation = new ArrayList<AgentInformation>();
+		addNewPlayer();
+		addNewPlayer();
+	}
+	
+	/**
+	 * Adds a new player agent and updates the GUI
+	 * 
+	 * Essentially:
+	 * 	1) add the new player to the game (through game controller relay)
+	 * 	2) add player's information to the GUI
+	 * 	3) repaint the relevant window part
+	 */
+	 private void addNewPlayer() {
+		//agentsInformation.add(myAgent.addPlayer());
+
+		AgentInformation info = new AgentInformation();
+		info.setName("name");
+		info.setWord("word");
+		info.setLetters("letters");
+		info.setPoints(10);
+		info.setLevel(1);
+		info.setPlaying(true);
+		
+		info.drawIn(topPanel);
+
+		doLog("Added a new player", true);
+	 }
 }

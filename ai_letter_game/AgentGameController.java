@@ -42,7 +42,7 @@ public class AgentGameController extends MockAgent {
 	
 	// current player
 	private int currentPlayer;
-	private final int maxPlayers = 15;
+	private int maxPlayers;
 	
 	// game state
 	private final int startMoney = 10;
@@ -68,6 +68,7 @@ public class AgentGameController extends MockAgent {
 		myGui.setVisible(true);
 		
 		// Initialize the state machine
+		maxPlayers = 2;
 		currentPlayer = 1;
 	}
 
@@ -84,12 +85,14 @@ public class AgentGameController extends MockAgent {
 
 		// UI updates
 		// switch enabled action buttons
+		/*
 		myGui.btnStartGame.setEnabled(false);
 		myGui.comboPlayer1.setEnabled(false);
 		myGui.comboPlayer2.setEnabled(false);
 		myGui.comboPlayer3.setEnabled(false);
 		myGui.comboPlayer4.setEnabled(false);
 		myGui.btnStopGame.setEnabled(true);
+		*/
 
 		// create the players
 		try {
@@ -133,6 +136,7 @@ public class AgentGameController extends MockAgent {
 				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+maxPlayers]+";"+goalWords[i+maxPlayers]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
 				
+				/*
 				String ui = "Player "+ (i+1) + " ["+ credits[i] +"] " + goalWords[i];
 				switch (i) {
 					case 0:
@@ -148,6 +152,7 @@ public class AgentGameController extends MockAgent {
 						myGui.txtInfoPlayer4.setText(ui);
 						break;
 				}
+				*/
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -177,14 +182,26 @@ public class AgentGameController extends MockAgent {
 		
 		// UI updates
 		// switch enabled action buttons
+		/*
 		myGui.btnStopGame.setEnabled(false);
 		myGui.comboPlayer1.setEnabled(true);
 		myGui.comboPlayer3.setEnabled(true);
 		myGui.comboPlayer2.setEnabled(true);
 		myGui.comboPlayer4.setEnabled(true);
 		myGui.btnStartGame.setEnabled(true);
+		*/
 	}
-	
+
+	public AgentInformation addPlayer() {
+		this.maxPlayers++;
+		
+		AgentInformation agentInformation = new AgentInformation();
+		
+		debugLog("Added a new player. Current count: " + maxPlayers);
+		
+		return agentInformation;
+	}
+
 	@SuppressWarnings("serial")
 	class startTurnBehaviour extends OneShotBehaviour {
 		public void action() {
@@ -244,7 +261,7 @@ public class AgentGameController extends MockAgent {
 								consoleLog(msg.getSender().getName()
 											+ " has leveled up and is now on level "
 											+ levels[currentPlayer] + ".");
-								
+								/*
 								String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
 								switch (currentPlayer) {
 									case 0: myGui.txtInfoPlayer1.setText(ui); break;
@@ -253,6 +270,7 @@ public class AgentGameController extends MockAgent {
 									case 3: myGui.txtInfoPlayer4.setText(ui); break;
 									default: break;
 								}
+								*/
 							}
 						} else if(content.equals("I'll be outside playing.")) {
 							isPlaying[currentPlayer] = false;
@@ -342,6 +360,8 @@ public class AgentGameController extends MockAgent {
 						updateMessage.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
 						updateMessage.setContent("DELETE;"+details[1]+";"+details[2]);
 						send(updateMessage);
+						
+						/*
 						String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
 						switch (currentPlayer) {
 							case 0: myGui.txtInfoPlayer1.setText(ui); break;
@@ -350,11 +370,15 @@ public class AgentGameController extends MockAgent {
 							case 3: myGui.txtInfoPlayer4.setText(ui); break;
 							default: break;
 						}
+						*/
+						
 						// seller
 						updateMessage.addReceiver(new AID(details[0], AID.ISLOCALNAME));
 						updateMessage.setContent("UPDATE;"+details[1]+";"+details[2]);
 						send(updateMessage);
 						System.out.println("Accepted proposal: "+proposal);
+						
+						/*
 						int player = Integer.parseInt(""+details[0].charAt(6))-1;
 						String ui2 = "Player "+ (player+1) + " ["+ credits[player] +"] " + goalWords[player];
 						switch (player) {
@@ -364,6 +388,7 @@ public class AgentGameController extends MockAgent {
 							case 3: myGui.txtInfoPlayer4.setText(ui2); break;
 							default: break;
 						}
+						*/
 						break;
 					case ACLMessage.REJECT_PROPOSAL:
 						addBehaviour(new doTurnBehaviour());
@@ -391,6 +416,13 @@ public class AgentGameController extends MockAgent {
 		addBehaviour(behaviour);
 	}
 	
+	/**
+	 * @return the maxPlayers
+	 */
+	public int getMaxPlayers() {
+		return maxPlayers;
+	}
+
 	private int getNextPlayer() {
 		int offsetMaxPlayers = maxPlayers-1;
 		int nextPlayer = (currentPlayer == offsetMaxPlayers) ? 0 : currentPlayer+1;
