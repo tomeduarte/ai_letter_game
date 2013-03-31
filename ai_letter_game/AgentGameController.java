@@ -112,7 +112,7 @@ public class AgentGameController extends MockAgent {
 				agentInfo.setPoints(startMoney);
 				agentInfo.setWords(words);
 				agentInfo.setLetters(startingLetters[i]);
-				agentInfo.setPlaying( currentPlayer == i );
+				agentInfo.setPlaying( true );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
