@@ -98,29 +98,21 @@ public class AgentGameController extends MockAgent {
 		startingLetters = getStartingLetters(goalWords);
 		try {
 			for(int i=0; i<getMaxPlayers(); i++) {
+				String[] words = { goalWords[i], goalWords[i+getMaxPlayers()], goalWords[i+getMaxPlayers()*2] };
+
+				// send message to agent
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
-				// starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
-				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+getMaxPlayers()]+";"+goalWords[i+getMaxPlayers()]+";"+startingLetters[i]+";"+(currentPlayer == i));
+				// format: starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
+				msg.setContent(startMoney + ";" + words[0] + ";" + words[1] + ";" + words[2] + ";" + startingLetters[i] + ";" + (currentPlayer == i));
 				send(msg);
-				
-				/*
-				String ui = "Player "+ (i+1) + " ["+ credits[i] +"] " + goalWords[i];
-				switch (i) {
-					case 0:
-						myGui.txtInfoPlayer1.setText(ui);	
-						break;
-					case 1:
-						myGui.txtInfoPlayer2.setText(ui);
-						break;
-					case 2:
-						myGui.txtInfoPlayer3.setText(ui);
-						break;
-					case 3:
-						myGui.txtInfoPlayer4.setText(ui);
-						break;
-				}
-				*/
+
+				// update UI
+				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
+				agentInfo.setPoints(startMoney);
+				agentInfo.setWords(words);
+				agentInfo.setLetters(startingLetters[i]);
+				agentInfo.setPlaying( currentPlayer == i );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -161,9 +153,10 @@ public class AgentGameController extends MockAgent {
 	}
 
 	public AgentInformation addPlayer() {
+		String[] emptyWords = { "----", "-----", "------" };
 		AgentInformation agentInfo = new AgentInformation(getMaxPlayers());
 		agentInfo.setName("Player");
-		agentInfo.setWord("-");
+		agentInfo.setWords(emptyWords);
 		agentInfo.setLetters("-");
 		agentInfo.setPoints(startMoney);
 		agentInfo.setLevel(LEVEL1);

@@ -9,13 +9,13 @@ import javax.swing.SwingUtilities;
 
 public class AgentInformation {
 
-	private String 	name;
-	private String 	word;
-	private String 	letters;
-	private int     points;
-	private int     level;
-	private int		player_id;
-	private boolean	playing;
+	private String 		name;
+	private String[]	words;
+	private String 		letters;
+	private int     	points;
+	private int     	level;
+	private int			player_id;
+	private boolean		playing;
 
 	/**
 	 * UI Objects
@@ -40,8 +40,8 @@ public class AgentInformation {
 	public String getName() {
 		return name;
 	}
-	public String getWord() {
-		return word;
+	public String[] getWords() {
+		return words;
 	}
 	public String getLetters() {
 		return letters;
@@ -57,21 +57,27 @@ public class AgentInformation {
 	}
 	public void setName(String name) {
 		this.name = name + getPlayer_id();
+		updateDrawn();
 	}
-	public void setWord(String word) {
-		this.word = word;
+	public void setWords(String[] words) {
+		this.words = words;
+		updateDrawn();
 	}
 	public void setLetters(String letters) {
 		this.letters = letters;
+		updateDrawn();
 	}
 	public void setPoints(int points) {
 		this.points = points;
+		updateDrawn();
 	}
 	public void setLevel(int level) {
 		this.level = level;
+		updateDrawn();
 	}
 	public void setPlaying(boolean playing) {
 		this.playing = playing;
+		updateDrawn();
 	}
 
 	public JPanel getDrawnPanel() {
@@ -86,9 +92,10 @@ public class AgentInformation {
 		}
 		return nameLabel;
 	}
+
 	public JLabel getWordLabel() {
 		if (wordLabel == null) {
-			this.wordLabel = new JLabel(getWord());
+			this.wordLabel = new JLabel( getCurrentWord() );
 		}
 		return wordLabel;
 	}
@@ -124,6 +131,27 @@ public class AgentInformation {
 		removeButton.setName(getPlayer_id());
 		removeButton.addActionListener(al);
 	}
+	private String getCurrentWord() {
+		return getWords()[ getLevel() ];
+	}
+	
+	/**
+	 * UI - update display
+	 */
+	private void updateDrawn() {
+		if(drawnPanel != null) {
+			getNameLabel().setText(getName());
+			getWordLabel().setText(getCurrentWord());
+			getLettersLabel().setText(getLetters());
+			getPointsLabel().setText( String.valueOf(getPoints()) );
+			getPlayingLabel().setText( String.valueOf(isPlaying()) );
+			getLevelLabel().setText( String.valueOf(getLevel()) );
+			
+			drawnPanel.revalidate();
+			drawnPanel.repaint();
+			SwingUtilities.getRoot(drawnPanel).validate();
+		}
+	}
 
 	/**
 	 * UI - Draw agent information on a given JPanel
@@ -142,9 +170,7 @@ public class AgentInformation {
 		drawnPanel.add(getLevelLabel(), "gap unrel, sg level");
 		drawnPanel.add(getPlayingLabel(), "gap unrel, sg playing, wrap");
 
-		drawnPanel.revalidate();
-		drawnPanel.repaint();
-		SwingUtilities.getRoot(drawnPanel).validate();
+		updateDrawn();
 	}
 
 	/**
@@ -159,9 +185,7 @@ public class AgentInformation {
 		drawnPanel.remove(getPlayingLabel());
 		drawnPanel.remove(getLevelLabel());
 
-		drawnPanel.revalidate();
-		drawnPanel.repaint();
-		SwingUtilities.getRoot(drawnPanel).validate();
+		updateDrawn();
 	}
 	
 	/**
