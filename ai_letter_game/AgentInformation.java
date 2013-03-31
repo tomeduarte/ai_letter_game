@@ -132,7 +132,7 @@ public class AgentInformation {
 		removeButton.addActionListener(al);
 	}
 	private String getCurrentWord() {
-		return getWords()[ getLevel() ];
+		return getWords()[ getLevel()-1 ];
 	}
 
 	/**
