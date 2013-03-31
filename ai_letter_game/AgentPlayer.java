@@ -96,7 +96,7 @@ public class AgentPlayer extends MockAgent
 		for(String proposal : proposals) {
 			String[] details = proposal.split("#");
 			int price = Integer.parseInt(details[1]);
-			if (credits > price) {
+			if (credits >= price) {
 				if(min == -1 || min > price) {
 					min = price;
 					selected = details[0].substring(0,7) + ";" + price + ";";
