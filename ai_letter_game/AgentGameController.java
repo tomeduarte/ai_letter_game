@@ -308,7 +308,7 @@ public class AgentGameController extends MockAgent {
 						
 						// update status
 						String[] details = proposal.split(";");
-						int sellerId = Integer.parseInt( "" + details[0].charAt(6) ) - 1;
+						int sellerId = playerIds.indexOf("" + details[0].charAt(6));
 						AgentInformation currentPlayerInfo = myGui.getAgentInformation(playerIds.get(currentPlayer));
 						AgentInformation sellerPlayerInfo = myGui.getAgentInformation(playerIds.get(sellerId));
 
