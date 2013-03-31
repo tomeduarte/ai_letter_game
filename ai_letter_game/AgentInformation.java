@@ -1,34 +1,20 @@
 package ai_letter_game;
 
-import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 public class AgentInformation {
-
-	private class RemoveButtonAction implements ActionListener {
-		private AgentInformation agentInformation;
-
-		public RemoveButtonAction(AgentInformation agentInformation) {
-			this.agentInformation = agentInformation;
-		}
-		public void actionPerformed(ActionEvent ae) {
-			this.agentInformation.removeDrawnInformation();
-		}
-	}
 
 	private String 	name;
 	private String 	word;
 	private String 	letters;
 	private int     points;
 	private int     level;
+	private int		player_id;
 	private boolean	playing;
 
 	/**
@@ -44,16 +30,12 @@ public class AgentInformation {
 	private JLabel	playingLabel;
 
 
-	public AgentInformation() { };
-	public AgentInformation(String name, String word, String letters,
-			int points, int level, boolean playing) {
-		super();
-		this.name = name;
-		this.word = word;
-		this.letters = letters;
-		this.points = points;
-		this.level = level;
-		this.playing = playing;
+	public AgentInformation(int id) {
+		this.player_id = id;
+	};
+
+	public String getPlayer_id() {
+		return String.valueOf(player_id);
 	}
 	public String getName() {
 		return name;
@@ -92,15 +74,10 @@ public class AgentInformation {
 		this.playing = playing;
 	}
 
-
 	public JPanel getDrawnPanel() {
 		return drawnPanel;
 	}
 	public JButton getRemoveButton() {
-		if(removeButton == null) {
-			this.removeButton= new JButton("remover");
-			removeButton.addActionListener(new RemoveButtonAction(this));
-		}
 		return removeButton;
 	}
 	public JLabel getNameLabel() {
@@ -142,14 +119,20 @@ public class AgentInformation {
 	public void setDrawnPanel(JPanel panel) {
 		this.drawnPanel = panel;
 	}
+	public void setRemoveButton(ActionListener al) {
+		this.removeButton = new JButton("remover");
+		removeButton.setName(getPlayer_id());
+		removeButton.addActionListener(al);
+	}
 
 	/**
 	 * UI - Draw agent information on a given JPanel
 	 * @param panel the panel to draw on
 	 * @param agentId the agent identifier
 	 */
-	public void drawIn(JPanel panel) {
+	public void drawIn(JPanel panel, ActionListener listener) {
 		setDrawnPanel(panel);
+		setRemoveButton(listener);
 
 		drawnPanel.add(getRemoveButton(), "sg delete");
 		drawnPanel.add(getNameLabel(), "gap unrel, sg name");

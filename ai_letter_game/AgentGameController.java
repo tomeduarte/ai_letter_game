@@ -63,13 +63,13 @@ public class AgentGameController extends MockAgent {
 		this.serviceDescriptionType = "controller" + hashCode();
 		this.serviceDescriptionName = "game-controller" + hashCode();
 
+		// Initialize the state machine
+		maxPlayers = 0;
+		currentPlayer = 1;
+
 		// Set up the gui
 		myGui = new LetterGameGui(this);
 		myGui.setVisible(true);
-		
-		// Initialize the state machine
-		maxPlayers = 2;
-		currentPlayer = 1;
 	}
 
 	@Override
@@ -193,13 +193,25 @@ public class AgentGameController extends MockAgent {
 	}
 
 	public AgentInformation addPlayer() {
-		this.maxPlayers++;
-		
-		AgentInformation agentInformation = new AgentInformation();
-		
-		debugLog("Added a new player. Current count: " + maxPlayers);
-		
-		return agentInformation;
+		AgentInformation info = new AgentInformation(getMaxPlayers());
+		info.setName("Player");
+		info.setWord("-");
+		info.setLetters("-");
+		info.setPoints(startMoney);
+		info.setLevel(LEVEL1);
+		info.setPlaying(true);
+
+		this.maxPlayers += 1;
+
+		debugLog("Added a new player. Current count: " + getMaxPlayers());
+
+		return info;
+	}
+
+	public void removePlayer() {
+		this.maxPlayers -= 1;
+
+		debugLog("Removed a player. Current count: " + getMaxPlayers());
 	}
 
 	@SuppressWarnings("serial")
@@ -408,7 +420,9 @@ public class AgentGameController extends MockAgent {
 	}
 	
 	private void debugLog(String message) {
-		myGui.debugLog(message);
+		if(myGui != null) {
+			myGui.debugLog(message);
+		}
 	}
 	
 	private void myAddBehaviour(OneShotBehaviour behaviour) {

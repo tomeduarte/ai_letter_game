@@ -2,14 +2,11 @@ package ai_letter_game;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
-import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JComboBox;
@@ -28,7 +25,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private static int logLevel = LOG_DEBUG;
 
 	// GameController Relay Object
-	private static AgentGameController myAgent;
+	private AgentGameController myAgent;
 
 	// UI objects
 	MigLayout layout;
@@ -38,7 +35,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	JScrollPane topScrollPane;
 
 	// agents information
-	List<AgentInformation> agentsInformation;
+	HashMap<String, AgentInformation> agentsInformation;
 
 	/**
 	 * Create the frame.
@@ -307,6 +304,9 @@ public class LetterGameGui extends JFrame implements ActionListener{
 			doLog("OK");
 		} else if (action.equals("ADICIONAR")) {
 			addNewPlayer();
+		} else if (action.equals("remover")) {
+			JButton clickedButton = (JButton) ae.getSource();
+			removePlayer(clickedButton.getName());
 		}
 	}
 	
@@ -341,7 +341,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	 * Setup initial gamestate (two players, no more information)
 	 */
 	private void setupDefaultGamestate() {
-		agentsInformation = new ArrayList<AgentInformation>();
+		agentsInformation = new HashMap<String, AgentInformation>();
 		addNewPlayer();
 		addNewPlayer();
 	}
@@ -354,19 +354,24 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	 * 	2) add player's information to the GUI
 	 * 	3) repaint the relevant window part
 	 */
-	 private void addNewPlayer() {
-		//agentsInformation.add(myAgent.addPlayer());
+	private void addNewPlayer() {
+		AgentInformation info = myAgent.addPlayer();
 
-		AgentInformation info = new AgentInformation();
-		info.setName("name");
-		info.setWord("word");
-		info.setLetters("letters");
-		info.setPoints(10);
-		info.setLevel(1);
-		info.setPlaying(true);
-
-		info.drawIn(playersPanel);
+		agentsInformation.put(info.getPlayer_id(), info);
+		info.drawIn(playersPanel, this);
 
 		doLog("Added a new player", true);
-	 }
+	}
+
+	/**
+	 * Remove player from the game and update the GUI
+	 */
+	private void removePlayer(String player_id) {
+		myAgent.removePlayer();
+
+		AgentInformation removedAgent = agentsInformation.remove(player_id);
+		removedAgent.removeDrawnInformation();
+
+		doLog("Removed player " + player_id, true);
+	}
 }
