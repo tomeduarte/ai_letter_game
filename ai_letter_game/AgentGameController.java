@@ -51,6 +51,7 @@ public class AgentGameController extends MockAgent {
 	private int credits[];
 	private boolean isPlaying[];
 	private String requestLetter;
+	private List<String> playerIds;
 	String[] simpleGoalWords = {
 							"cold", "mind", "fire", "word",
 							"blind", "stuff", "upset", "freak",
@@ -64,8 +65,9 @@ public class AgentGameController extends MockAgent {
 		this.serviceDescriptionName = "game-controller" + hashCode();
 
 		// Initialize the state machine
-		maxPlayers = 0;
-		currentPlayer = 1;
+		this.maxPlayers = 0;
+		this.currentPlayer = 1;
+		this.playerIds = new ArrayList<String>();
 
 		// Set up the gui
 		myGui = new LetterGameGui(this);
@@ -201,6 +203,8 @@ public class AgentGameController extends MockAgent {
 		info.setLevel(LEVEL1);
 		info.setPlaying(true);
 
+		playerIds.add(info.getPlayer_id());
+
 		this.maxPlayers += 1;
 
 		debugLog("Added a new player. Current count: " + getMaxPlayers());
@@ -208,7 +212,9 @@ public class AgentGameController extends MockAgent {
 		return info;
 	}
 
-	public void removePlayer() {
+	public void removePlayer(String playerId) {
+		playerIds.remove(playerId);
+
 		this.maxPlayers -= 1;
 
 		debugLog("Removed a player. Current count: " + getMaxPlayers());

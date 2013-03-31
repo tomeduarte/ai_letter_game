@@ -367,7 +367,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	 * Remove player from the game and update the GUI
 	 */
 	private void removePlayer(String player_id) {
-		myAgent.removePlayer();
+		myAgent.removePlayer(player_id);
 
 		AgentInformation removedAgent = agentsInformation.remove(player_id);
 		removedAgent.removeDrawnInformation();
