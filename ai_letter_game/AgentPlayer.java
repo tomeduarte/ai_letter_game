@@ -7,6 +7,11 @@ import jade.lang.acl.ACLMessage;
 @SuppressWarnings("serial")
 public class AgentPlayer extends MockAgent 
 {
+	// Logging
+	private static final int LOG_INFO = 0;
+	private static final int LOG_DEBUG = 1;
+	private static int logLevel = LOG_DEBUG;
+
 	private int credits;
 	private int level;
 	private int lastRequested;
@@ -108,7 +113,12 @@ public class AgentPlayer extends MockAgent
 		}
 		return selected;
 	}
-	
+
+	private void debugLog(String message) {
+		if(logLevel == LOG_DEBUG)
+			System.out.println("[PL. DEBUG] " + message);
+	}
+
 	class initGamestateBehaviour extends OneShotBehaviour {
 		public void action() {
 			// get the start message from the controller
