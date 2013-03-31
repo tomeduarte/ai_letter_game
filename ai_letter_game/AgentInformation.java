@@ -1,11 +1,15 @@
 package ai_letter_game;
 
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 public class AgentInformation {
 
@@ -157,6 +161,7 @@ public class AgentInformation {
 
 		drawnPanel.revalidate();
 		drawnPanel.repaint();
+		SwingUtilities.getRoot(drawnPanel).validate();
 	}
 
 	/**
@@ -172,6 +177,7 @@ public class AgentInformation {
 		drawnPanel.remove(getLevelLabel());
 
 		drawnPanel.revalidate();
-		drawnPanel.repaint();		
+		drawnPanel.repaint();
+		SwingUtilities.getRoot(drawnPanel).validate();
 	}
 }

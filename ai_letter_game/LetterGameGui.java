@@ -33,8 +33,8 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	// UI objects
 	MigLayout layout;
 	JPanel globalPanel;
-	JPanel topPanel;
-	JPanel bottomPanel;
+	JPanel playersPanel;
+	JPanel controlsPanel;
 	JScrollPane topScrollPane;
 
 	// agents information
@@ -65,19 +65,19 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private void setupGUILayout() {
 
 		// ==== LAYOUT ====
-		this.layout 	  = new MigLayout("debug", "[grow, fill]", "[]");
-		this.topPanel 	  = new JPanel(layout);
-		this.bottomPanel  = new JPanel(layout);
-		this.globalPanel  = new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
+		this.layout 	  	= new MigLayout("debug", "[grow, fill]", "[]");
+		this.playersPanel 	= new JPanel(layout);
+		this.controlsPanel  = new JPanel(layout);
+		this.globalPanel 	= new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
 
 		// ==== TOP PANEL ====
-		topPanel.add(new JLabel(""), 			"sg delete");
-		topPanel.add(new JLabel("NOME"), 		"gap unrel, sg name");
-		topPanel.add(new JLabel("PALAVRA"), 	"gap unrel, sg palavra");
-		topPanel.add(new JLabel("LETRAS"), 		"gap unrel, sg letters");
-		topPanel.add(new JLabel("PONTOS"), 		"gap unrel, sg points");
-		topPanel.add(new JLabel("NÍVEL"), 		"gap unrel, sg level");
-		topPanel.add(new JLabel("A JOGAR?"), 	"gap unrel, sg playing, wrap");
+		playersPanel.add(new JLabel(""), 			"sg delete");
+		playersPanel.add(new JLabel("NOME"), 		"gap unrel, sg name");
+		playersPanel.add(new JLabel("PALAVRA"), 	"gap unrel, sg palavra");
+		playersPanel.add(new JLabel("LETRAS"), 		"gap unrel, sg letters");
+		playersPanel.add(new JLabel("PONTOS"), 		"gap unrel, sg points");
+		playersPanel.add(new JLabel("NÍVEL"), 		"gap unrel, sg level");
+		playersPanel.add(new JLabel("A JOGAR?"), 	"gap unrel, sg playing, wrap");
 
 		// ==== BOTTOM PANEL ====
 		// number of players information
@@ -99,18 +99,18 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		stopGameButton.setEnabled(false);
 
 		// add elements to the bottom layout panel
-		bottomPanel.add(numberOfPlayers, "center, flowy, split 2");
-		bottomPanel.add(numberOfPlayersLegend, "center, width pref!");
-		bottomPanel.add(newPlayerBehaviourCombo, "center, flowy, split 2");
-		bottomPanel.add(newPlayerAddButton, "center");
-		bottomPanel.add(startGameButton, "gap unrel, growy");
-		bottomPanel.add(stopGameButton, "growy");
+		controlsPanel.add(numberOfPlayers, "center, flowy, split 2");
+		controlsPanel.add(numberOfPlayersLegend, "center, width pref!");
+		controlsPanel.add(newPlayerBehaviourCombo, "center, flowy, split 2");
+		controlsPanel.add(newPlayerAddButton, "center");
+		controlsPanel.add(startGameButton, "gap unrel, growy");
+		controlsPanel.add(stopGameButton, "growy");
 
 		// append to global panel
-		this.topScrollPane = new JScrollPane(topPanel);
-		globalPanel.add(this.topScrollPane, "growy, wrap");
+        globalPanel.add(this.controlsPanel, "wrap");
         globalPanel.add(new JSeparator(), "wrap");
-        globalPanel.add(this.bottomPanel);
+		this.topScrollPane = new JScrollPane(playersPanel);
+		globalPanel.add(this.topScrollPane, "growy");
 		getContentPane().add(this.globalPanel);
 		
 		/* OLD GUI CODE
@@ -281,15 +281,13 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private void showGUI() {
 		// window settings
 		setTitle("A.I. Letter Game");
-		setResizable(true);
+		setResizable(false);
 		setAlwaysOnTop(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//setBounds(260, 100, 800, 600);
-		setExtendedState( getExtendedState()|JFrame.MAXIMIZED_BOTH );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		// display window
 		pack();
+		setBounds(200, 10, 1024, 768);
 		setLocationRelativeTo(null);
 	}
 
@@ -366,8 +364,8 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		info.setPoints(10);
 		info.setLevel(1);
 		info.setPlaying(true);
-		
-		info.drawIn(topPanel);
+
+		info.drawIn(playersPanel);
 
 		doLog("Added a new player", true);
 	 }
