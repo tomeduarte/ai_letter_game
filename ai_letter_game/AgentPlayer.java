@@ -1,13 +1,6 @@
 package ai_letter_game;
 
-import java.util.Arrays;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
-
-import ai_letter_game.AgentGameController.doTurnBehaviour;
-
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -38,8 +31,7 @@ public class AgentPlayer extends MockAgent
 	}
 	
 	protected boolean canBuildGoalString() {
-		String tmp = new String(letters);
-		
+		/*
 		for(int j = 0; j < goalStrings.length; j++ ) {
 			for (int i = 0; i < goalStrings[j].length(); i++) {
 			    char c = goalStrings[j].charAt(i);        
@@ -51,22 +43,42 @@ public class AgentPlayer extends MockAgent
 			    	tmp = tmp.substring(0,index)+tmp.substring(index+1);
 			}
 		}
-		
+		*/
+
+		String tmp = new String(letters);
+		String goalWord = goalStrings[level];
+
+		for(int i = 0; i < goalWord.length(); i++) {
+			char characterAtPosition = goalWord.charAt(i);
+			int index = tmp.indexOf(characterAtPosition);
+
+			if(index == -1) {
+				// characters missing
+				return false;
+			} else {
+				// remove from character list
+				tmp = tmp.substring(0,index)+tmp.substring(index+1);
+			}
+		}
+
 		return true;
 	}
 	
 	protected String needLetter() {
+		if (canBuildGoalString())
+			return new String("NO MORE");
+
 		char c;
 		String word = goalStrings[level];
 		String allLetters = new String(letters);
-		
+
 		if(lastRequested == word.length()) {
 			lastRequested = 8;
 			return new String("NO MORE");
 		} else if (lastRequested == 8) {
 			lastRequested = 0;
 		}
-		
+
 		for(int i= lastRequested; i < word.length(); i++) {
 			c = word.charAt(i);
 			if(allLetters.indexOf(c) == -1) {
@@ -110,8 +122,8 @@ public class AgentPlayer extends MockAgent
 			goalStrings[0] = info[1];
 			goalStrings[1] = info[2];
 			goalStrings[2] = info[3];
-			letters = info[4];;
-			
+			letters = info[4];
+
 			// is it my turn next or should I wait for CFP ?
 			if(Boolean.parseBoolean(info[5])) {
 				addBehaviour(new waitTurnBehaviour());
@@ -125,7 +137,7 @@ public class AgentPlayer extends MockAgent
 			// get INFORM to start our turn
 			ACLMessage startTurn = new ACLMessage(ACLMessage.INFORM);
 			startTurn = myAgent.blockingReceive();
-			
+
 			// do we need a letter?
 			String reqLetter = ((AgentPlayer) myAgent).needLetter();
 			if(reqLetter.equals("NO MORE")) {
@@ -136,12 +148,12 @@ public class AgentPlayer extends MockAgent
 				request.addReceiver(new AID("GameController", AID.ISLOCALNAME));
 				request.setContent(reqLetter);
 				send(request);
-	
+
 				// wait for proposals
 				ACLMessage answer = new ACLMessage(ACLMessage.PROPOSE);
 				answer = myAgent.blockingReceive();
 				String proposals = answer.getContent();
-	
+
 				// send decision
 				System.out.println("Received proposals: " + proposals);
 				String decision = ((AgentPlayer) myAgent).selectProposal(proposals); 
