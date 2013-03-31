@@ -137,13 +137,17 @@ public class AgentPlayer extends MockAgent
 			// is it my turn next or should I wait for CFP ?
 			if(Boolean.parseBoolean(info[5])) {
 				addBehaviour(new waitTurnBehaviour());
+				debugLog("initGamestateBehaviour - add waitTurnBehaviour()");
 			} else {
 				addBehaviour(new waitCFPBehaviour());
+				debugLog("initGamestateBehaviour - add waitCFPBehaviour()");
 			}
 		}
 	}
 	class waitTurnBehaviour extends OneShotBehaviour {
 		public void action() {
+			debugLog("### waitTurnBehaviour - has " + letters + " for " + goalStrings[level]);
+
 			// get INFORM to start our turn
 			ACLMessage startTurn = new ACLMessage(ACLMessage.INFORM);
 			startTurn = myAgent.blockingReceive();
@@ -151,8 +155,10 @@ public class AgentPlayer extends MockAgent
 			// do we need a letter?
 			String reqLetter = ((AgentPlayer) myAgent).needLetter();
 			if(reqLetter.equals("NO MORE")) {
-				
+				debugLog("### --- no letter needed");
 			} else if(reqLetter.length() > 0) {
+				debugLog("### --- needs " + reqLetter );
+
 				// send request
 				ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
 				request.addReceiver(new AID("GameController", AID.ISLOCALNAME));
@@ -181,20 +187,23 @@ public class AgentPlayer extends MockAgent
 				addBehaviour(new waitCFPBehaviour());
 				return;
 			}
-
+			debugLog("### --- oi? turn ended and failed" + reqLetter );
 			totalFails++;
-			
+
 			// notify the game controller turn has ended. 
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(new AID("gameController", AID.ISLOCALNAME));
 			if(canBuildGoalString()) {	// have we completed this level?
 				msg.setContent("all your base are belong to us");
+				level = (level == 0) ? 1 : 2;
 			} else if(totalFails == 10) {
 				msg.setContent("I'll be outside playing.");
 			} else {
 				msg.setContent("Treasure what little time remains of your lives.");
 			}
 			send(msg);
+
+			debugLog(msg.toString());
 
 			// wait for CFP
 			addBehaviour(new waitCFPBehaviour());

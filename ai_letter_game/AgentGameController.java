@@ -68,6 +68,7 @@ public class AgentGameController extends MockAgent {
 	}
 
 	public void startGame() {
+		debugLog("### .startGame()");
 		currentBehaviour = null;
 
 		// create the players
@@ -97,6 +98,7 @@ public class AgentGameController extends MockAgent {
 		goalWords = getGoalWords();
 		startingLetters = getStartingLetters(goalWords);
 		try {
+			debugLog("### --- messages sent");
 			for(int i=0; i<getMaxPlayers(); i++) {
 				String[] words = { goalWords[i], goalWords[i+getMaxPlayers()], goalWords[i+getMaxPlayers()*2] };
 
@@ -106,6 +108,8 @@ public class AgentGameController extends MockAgent {
 				// format: starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
 				msg.setContent(startMoney + ";" + words[0] + ";" + words[1] + ";" + words[2] + ";" + startingLetters[i] + ";" + (currentPlayer == i));
 				send(msg);
+
+				debugLog(msg.toString());
 
 				// update UI
 				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
@@ -167,14 +171,17 @@ public class AgentGameController extends MockAgent {
 	class startTurnBehaviour extends OneShotBehaviour {
 		public void action() {
 			try {
+				debugLog("### startTurnBehaviour");
 				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(currentPlayer));
 				String s = "A new round has started, " + agentInfo.getName() + " is playing.";
 				consoleLog(s);
-				debugLog(s);
+
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
 				msg.setContent("Somebody set up us the bomb.");
 				send(msg);
+
+				debugLog(msg.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -184,10 +191,14 @@ public class AgentGameController extends MockAgent {
 	class doTurnBehaviour extends OneShotBehaviour {
 		public void action() {
 			try {
+				debugLog("### doTurnBehaviour");
 				ACLMessage msg = myAgent.blockingReceive();
 				int performative = msg.getPerformative();
 				String content = msg.getContent();
-				
+
+				debugLog("### --- msg");
+				debugLog(msg.toString());
+
 				switch(performative) {
 					case ACLMessage.INFORM:
 						int nextPlayer = getNextPlayer();
@@ -197,7 +208,6 @@ public class AgentGameController extends MockAgent {
 							if(!agentInfo.isPlaying())
 								continue;
 
-							debugLog("Notifying " + agentInfo.getName() + " of new turn.");
 							ACLMessage msg2 = new ACLMessage(ACLMessage.INFORM);
 							msg2.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 							if(nextPlayer == i)
@@ -205,6 +215,9 @@ public class AgentGameController extends MockAgent {
 							else
 								msg2.setContent("You have no chance to survive make your time.");
 							send(msg2);
+
+							debugLog("### --- INFORM: notifying " + agentInfo.getName() + " of new turn:");
+							debugLog(msg2.toString());
 						}
 
 						// end turn
