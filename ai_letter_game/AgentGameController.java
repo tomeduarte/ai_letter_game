@@ -313,7 +313,9 @@ public class AgentGameController extends MockAgent {
 						AgentInformation sellerPlayerInfo = myGui.getAgentInformation(playerIds.get(sellerId));
 
 						currentPlayerInfo.setPoints( currentPlayerInfo.getPoints() - Integer.parseInt(details[1]) );
+						currentPlayerInfo.setLetters(currentPlayerInfo.getLetters() + details[2]);
 						sellerPlayerInfo.setPoints( sellerPlayerInfo.getPoints() + Integer.parseInt(details[1]) );
+						sellerPlayerInfo.setLetters( sellerPlayerInfo.getLetters().replace(details[2], ""));
 						
 						// buyer
 						updateMessage.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
