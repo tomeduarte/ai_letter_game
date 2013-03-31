@@ -51,7 +51,7 @@ public class AgentGameController extends MockAgent {
 		this.serviceDescriptionName = "game-controller" + hashCode();
 
 		// Initialize the state machine
-		this.currentPlayer = 1;
+		this.currentPlayer = 0;
 		this.playerIds = new ArrayList<String>();
 
 		// Set up the gui
