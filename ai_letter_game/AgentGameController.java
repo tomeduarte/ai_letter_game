@@ -1,23 +1,13 @@
 package ai_letter_game;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
-
-import ai_letter_game.AgentPlayer.waitCFPBehaviour;
-import ai_letter_game.AgentPlayer.waitTurnBehaviour;
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.AMSService;
-import jade.domain.FIPAAgentManagement.AMSAgentDescription;
-import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
@@ -47,9 +37,6 @@ public class AgentGameController extends MockAgent {
 	// game state
 	private final int startMoney = 10;
 	protected OneShotBehaviour currentBehaviour;
-	private int levels[];
-	private int credits[];
-	private boolean isPlaying[];
 	private String requestLetter;
 	private List<String> playerIds;
 	String[] simpleGoalWords = {
@@ -100,20 +87,12 @@ public class AgentGameController extends MockAgent {
 		try {
 			// holders for agents and game state
 			acPlayers 	= new AgentController[maxPlayers];
-			levels		= new int[maxPlayers];
-			credits		= new int[maxPlayers];
-			isPlaying 	= new boolean[maxPlayers];
 
 			for(int i=0; i < maxPlayers; i++) {
 				// create AgentPlayer
-				acPlayers[i] = container.createNewAgent("Player"+(i+1), "ai_letter_game.AgentPlayer", null);
+				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
+				acPlayers[i] = container.createNewAgent(agentInfo.getName(), "ai_letter_game.AgentPlayer", null);
 				acPlayers[i].start();
-
-				// init game state
-				levels[i]	 = LEVEL1;
-				credits[i]	 = startMoney;
-				isPlaying[i] = true;
-
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -195,21 +174,21 @@ public class AgentGameController extends MockAgent {
 	}
 
 	public AgentInformation addPlayer() {
-		AgentInformation info = new AgentInformation(getMaxPlayers());
-		info.setName("Player");
-		info.setWord("-");
-		info.setLetters("-");
-		info.setPoints(startMoney);
-		info.setLevel(LEVEL1);
-		info.setPlaying(true);
+		AgentInformation agentInfo = new AgentInformation(getMaxPlayers());
+		agentInfo.setName("Player");
+		agentInfo.setWord("-");
+		agentInfo.setLetters("-");
+		agentInfo.setPoints(startMoney);
+		agentInfo.setLevel(LEVEL1);
+		agentInfo.setPlaying(true);
 
-		playerIds.add(info.getPlayer_id());
+		playerIds.add(agentInfo.getPlayer_id());
 
 		this.maxPlayers += 1;
 
 		debugLog("Added a new player. Current count: " + getMaxPlayers());
 
-		return info;
+		return agentInfo;
 	}
 
 	public void removePlayer(String playerId) {
@@ -220,13 +199,13 @@ public class AgentGameController extends MockAgent {
 		debugLog("Removed a player. Current count: " + getMaxPlayers());
 	}
 
-	@SuppressWarnings("serial")
 	class startTurnBehaviour extends OneShotBehaviour {
 		public void action() {
 			try {
-				String s = "A new round has started, Player" + (currentPlayer+1) + " is playing.";
+				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(currentPlayer));
+				String s = "A new round has started, " + agentInfo.getName() + " is playing.";
 				consoleLog(s);
-				System.out.println(s);
+				debugLog(s);
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
 				msg.setContent("Somebody set up us the bomb.");
@@ -248,11 +227,12 @@ public class AgentGameController extends MockAgent {
 					case ACLMessage.INFORM:
 						int nextPlayer = getNextPlayer();
 						// notify every player of turn switch
-						for(int i=0; i<maxPlayers; i++) {
-							if(!isPlaying[i])
+						for(int i=0; i<playerIds.size(); i++) {
+							AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
+							if(!agentInfo.isPlaying())
 								continue;
 
-							debugLog("Notifying player " + i+1 + "of new turn.");
+							debugLog("Notifying " + agentInfo.getName() + " of new turn.");
 							ACLMessage msg2 = new ACLMessage(ACLMessage.INFORM);
 							msg2.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 							if(nextPlayer == i)
@@ -261,24 +241,25 @@ public class AgentGameController extends MockAgent {
 								msg2.setContent("You have no chance to survive make your time.");
 							send(msg2);
 						}
-						
+
 						// end turn
+						AgentInformation currentPlayerInfo = myGui.getAgentInformation(playerIds.get(currentPlayer));
 						if(content.equals("Treasure what little time remains of your lives.")) {
 							consoleLog(msg.getSender() + "passed turn.");
 						} else if(content.equals("all your base are belong to us")) {
-							if(levels[currentPlayer] == LEVEL3) {
-								credits[currentPlayer] += FINAL_SCORE;
-								isPlaying[currentPlayer] = false;
-								consoleLog(msg.getSender().getName() + " has completed all levels.");
+							if(currentPlayerInfo.getLevel() == LEVEL3) {
+								currentPlayerInfo.setPoints(currentPlayerInfo.getPoints() + FINAL_SCORE);
+								currentPlayerInfo.setPlaying(false);
+								consoleLog(currentPlayerInfo.getName() + " has completed all levels.");
 								
 								if(!activePlayersAvailable())
 									declareWinner();
 							} else {
-								credits[currentPlayer] += (levels[currentPlayer] == LEVEL1) ? LEVEL2_SCORE : LEVEL3_SCORE;
-								levels[currentPlayer] = (levels[currentPlayer] == LEVEL1) ? LEVEL2 : LEVEL3;
-								consoleLog(msg.getSender().getName()
+								currentPlayerInfo.setPoints( (currentPlayerInfo.getLevel() == LEVEL1) ? LEVEL2_SCORE : LEVEL3_SCORE );
+								currentPlayerInfo.setLevel( (currentPlayerInfo.getLevel() == LEVEL1) ? LEVEL2 : LEVEL3 );
+								consoleLog(currentPlayerInfo.getName()
 											+ " has leveled up and is now on level "
-											+ levels[currentPlayer] + ".");
+											+ currentPlayerInfo.getLevel() + ".");
 								/*
 								String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
 								switch (currentPlayer) {
@@ -291,7 +272,7 @@ public class AgentGameController extends MockAgent {
 								*/
 							}
 						} else if(content.equals("I'll be outside playing.")) {
-							isPlaying[currentPlayer] = false;
+							currentPlayerInfo.setPlaying(false);
 						}
 						
 						currentPlayer = nextPlayer;
@@ -334,7 +315,7 @@ public class AgentGameController extends MockAgent {
 				// get proposals
 				int answers=0;
 				String proposals="";
-				while(answers < 3) {
+				while(answers < maxPlayers) {
 					ACLMessage proposalMessage = new ACLMessage(ACLMessage.PROPOSE);
 					proposalMessage = blockingReceive();
 					String proposal = proposalMessage.getContent();
@@ -372,8 +353,13 @@ public class AgentGameController extends MockAgent {
 						
 						// update status
 						String[] details = proposal.split(";");
-						credits[currentPlayer] -= Integer.parseInt(details[1]);
-						credits[Integer.parseInt(""+details[0].charAt(6))-1] += Integer.parseInt(details[1]);
+						int sellerId = Integer.parseInt( "" + details[0].charAt(6) ) - 1;
+						AgentInformation currentPlayerInfo = myGui.getAgentInformation(playerIds.get(currentPlayer));
+						AgentInformation sellerPlayerInfo = myGui.getAgentInformation(playerIds.get(sellerId));
+
+						currentPlayerInfo.setPoints( currentPlayerInfo.getPoints() - Integer.parseInt(details[1]) );
+						sellerPlayerInfo.setPoints( sellerPlayerInfo.getPoints() + Integer.parseInt(details[1]) );
+						
 						// buyer
 						updateMessage.addReceiver(new AID(acPlayers[currentPlayer].getName(), AID.ISGUID));
 						updateMessage.setContent("DELETE;"+details[1]+";"+details[2]);
@@ -444,9 +430,11 @@ public class AgentGameController extends MockAgent {
 	}
 
 	private int getNextPlayer() {
-		int offsetMaxPlayers = maxPlayers-1;
+		int offsetMaxPlayers = playerIds.size() - 1;
 		int nextPlayer = (currentPlayer == offsetMaxPlayers) ? 0 : currentPlayer+1;
-		if(!isPlaying[nextPlayer]) {
+		AgentInformation nextPlayerInfo = myGui.getAgentInformation(playerIds.get(nextPlayer));
+
+		if(!nextPlayerInfo.isPlaying()) {
 			int counter = 1;
 			do {
 				counter++;
@@ -454,32 +442,36 @@ public class AgentGameController extends MockAgent {
 					nextPlayer = 0;
 				else
 					nextPlayer++;
-			} while (counter < offsetMaxPlayers && !isPlaying[nextPlayer]);
+
+				nextPlayerInfo = myGui.getAgentInformation(playerIds.get(nextPlayer));
+			} while (counter < offsetMaxPlayers && !nextPlayerInfo.isPlaying());
 		}
-		
+
 		return nextPlayer;
 	}	
-	
+
 	private boolean activePlayersAvailable() {
 		int counter = 0;
-		for(int i = 0; i < maxPlayers; i++) {
-			if (isPlaying[i])
+		for(int i = 0; i < playerIds.size(); i++) {
+			AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
+			if (agentInfo.isPlaying())
 				counter++;
 		}
 		return (counter >= 2);
 	}
-	
+
 	private void declareWinner() {
-		int winner = 0;
+		AgentInformation winner = myGui.getAgentInformation(playerIds.get(0));
 		
-		for(int i = 0; i < maxPlayers; i++) {
-			if (credits[i] > credits[winner])
-				winner = i;
+		for(int i = 1; i < playerIds.size(); i++) {
+			AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
+			if (agentInfo.getPoints() > winner.getPoints())
+				winner = agentInfo;
 		}
 		
-		consoleLog("== Player" + (winner+1) + " has won the game with " + credits[winner] + " credits! ==");
+		consoleLog("== " + winner.getName() + " has won the game with " + winner.getPoints() + " credits! ==");
 	}
-	
+
 	private String[] old_getStartingLetters(String[] words) {
 		String[] sletters = new String[maxPlayers];
 		String letters = new String();

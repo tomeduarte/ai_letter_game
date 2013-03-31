@@ -56,7 +56,7 @@ public class AgentInformation {
 		return playing;
 	}
 	public void setName(String name) {
-		this.name = name;
+		this.name = name + getPlayer_id();
 	}
 	public void setWord(String word) {
 		this.word = word;

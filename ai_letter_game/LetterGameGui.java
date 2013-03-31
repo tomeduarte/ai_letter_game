@@ -374,4 +374,11 @@ public class LetterGameGui extends JFrame implements ActionListener{
 
 		doLog("Removed player " + player_id, true);
 	}
+	
+	/**
+	 * Returns the game information for a given player id
+	 */
+	public AgentInformation getAgentInformation(String playerId) {
+		return agentsInformation.get(playerId);
+	}
 }
