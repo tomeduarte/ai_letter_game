@@ -32,7 +32,6 @@ public class AgentGameController extends MockAgent {
 	
 	// current player
 	private int currentPlayer;
-	private int maxPlayers;
 	
 	// game state
 	private final int startMoney = 10;
@@ -52,7 +51,6 @@ public class AgentGameController extends MockAgent {
 		this.serviceDescriptionName = "game-controller" + hashCode();
 
 		// Initialize the state machine
-		this.maxPlayers = 0;
 		this.currentPlayer = 1;
 		this.playerIds = new ArrayList<String>();
 
@@ -86,9 +84,9 @@ public class AgentGameController extends MockAgent {
 		// create the players
 		try {
 			// holders for agents and game state
-			acPlayers 	= new AgentController[maxPlayers];
+			acPlayers 	= new AgentController[getMaxPlayers()];
 
-			for(int i=0; i < maxPlayers; i++) {
+			for(int i=0; i < getMaxPlayers(); i++) {
 				// create AgentPlayer
 				AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
 				acPlayers[i] = container.createNewAgent(agentInfo.getName(), "ai_letter_game.AgentPlayer", null);
@@ -110,11 +108,11 @@ public class AgentGameController extends MockAgent {
 		goalWords = getGoalWords();
 		startingLetters = getStartingLetters(goalWords);
 		try {
-			for(int i=0; i<maxPlayers; i++) {
+			for(int i=0; i<getMaxPlayers(); i++) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(new AID(acPlayers[i].getName(), AID.ISGUID));
 				// starting credits, one word per level (4, 5, 6 chars), starting letters, is it their turn?
-				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+maxPlayers]+";"+goalWords[i+maxPlayers]+";"+startingLetters[i]+";"+(currentPlayer == i));
+				msg.setContent(startMoney+";"+goalWords[i]+";"+goalWords[i+getMaxPlayers()]+";"+goalWords[i+getMaxPlayers()]+";"+startingLetters[i]+";"+(currentPlayer == i));
 				send(msg);
 				
 				/*
@@ -148,13 +146,13 @@ public class AgentGameController extends MockAgent {
 		
 		// remove the players
 		try {
-			for(int i=0; i<maxPlayers; i++)
+			for(int i=0; i< getMaxPlayers(); i++)
 				acPlayers[i].kill();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
 			if (acPlayers != null) { 
-				for(int i=0; i<maxPlayers; i++) {
+				for(int i=0; i< getMaxPlayers(); i++) {
 					acPlayers[i] = null;
 				}
 				acPlayers = null;
@@ -184,8 +182,6 @@ public class AgentGameController extends MockAgent {
 
 		playerIds.add(agentInfo.getPlayer_id());
 
-		this.maxPlayers += 1;
-
 		debugLog("Added a new player. Current count: " + getMaxPlayers());
 
 		return agentInfo;
@@ -193,8 +189,6 @@ public class AgentGameController extends MockAgent {
 
 	public void removePlayer(String playerId) {
 		playerIds.remove(playerId);
-
-		this.maxPlayers -= 1;
 
 		debugLog("Removed a player. Current count: " + getMaxPlayers());
 	}
@@ -227,7 +221,7 @@ public class AgentGameController extends MockAgent {
 					case ACLMessage.INFORM:
 						int nextPlayer = getNextPlayer();
 						// notify every player of turn switch
-						for(int i=0; i<playerIds.size(); i++) {
+						for(int i=0; i<getMaxPlayers(); i++) {
 							AgentInformation agentInfo = myGui.getAgentInformation(playerIds.get(i));
 							if(!agentInfo.isPlaying())
 								continue;
@@ -315,7 +309,7 @@ public class AgentGameController extends MockAgent {
 				// get proposals
 				int answers=0;
 				String proposals="";
-				while(answers < maxPlayers) {
+				while(answers < (getMaxPlayers()-1)) {
 					ACLMessage proposalMessage = new ACLMessage(ACLMessage.PROPOSE);
 					proposalMessage = blockingReceive();
 					String proposal = proposalMessage.getContent();
@@ -426,11 +420,11 @@ public class AgentGameController extends MockAgent {
 	 * @return the maxPlayers
 	 */
 	public int getMaxPlayers() {
-		return maxPlayers;
+		return playerIds.size();
 	}
 
 	private int getNextPlayer() {
-		int offsetMaxPlayers = playerIds.size() - 1;
+		int offsetMaxPlayers = getMaxPlayers() - 1;
 		int nextPlayer = (currentPlayer == offsetMaxPlayers) ? 0 : currentPlayer+1;
 		AgentInformation nextPlayerInfo = myGui.getAgentInformation(playerIds.get(nextPlayer));
 
@@ -473,13 +467,13 @@ public class AgentGameController extends MockAgent {
 	}
 
 	private String[] old_getStartingLetters(String[] words) {
-		String[] sletters = new String[maxPlayers];
+		String[] sletters = new String[getMaxPlayers()];
 		String letters = new String();
 
 		for(int i=0; i < words.length; i++)
 			letters += words[i];
 
-		for(int i=0; i < maxPlayers; i++)
+		for(int i=0; i < getMaxPlayers(); i++)
 			sletters[i] = letters;
 
 		return sletters;
@@ -516,8 +510,8 @@ public class AgentGameController extends MockAgent {
 
 	private String[] getGoalWords() {
 		
-		String[] gwords = new String[maxPlayers*3];
-		int[] rnd = new int[maxPlayers];
+		String[] gwords = new String[getMaxPlayers()*3];
+		int[] rnd = new int[getMaxPlayers()];
 		Random gen = new Random();
 
 		try {
@@ -525,12 +519,12 @@ public class AgentGameController extends MockAgent {
 			BufferedReader bufRead = new BufferedReader(input);
 	
 			// gerar indexes para linhas aleatorias
-			for(int i=0 ; i < maxPlayers ; i++)
+			for(int i=0 ; i < getMaxPlayers() ; i++)
 				rnd[i] = gen.nextInt(370)+1;
 			
 			// ler palavras (tamanho 4)
 			Arrays.sort(rnd);
-			for(int i=0, adj=0; i < maxPlayers; adj=rnd[i++]) {
+			for(int i=0, adj=0; i < getMaxPlayers(); adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 5);
 				String word = bufRead.readLine();
 				gwords[i] = word;
@@ -541,15 +535,15 @@ public class AgentGameController extends MockAgent {
 			bufRead = new BufferedReader(input);
 	
 			// gerar indexes para linhas aleatorias
-			for(int i=0 ; i < maxPlayers ; i++)
+			for(int i=0 ; i < getMaxPlayers() ; i++)
 				rnd[i]=gen.nextInt(370)+1;
 			
 			// ler palavras (tamanho 5)
 			Arrays.sort(rnd);
-			for(int i=0,adj=0; i < maxPlayers ; adj=rnd[i++]) {
+			for(int i=0,adj=0; i < getMaxPlayers() ; adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 6);
 				String word = bufRead.readLine();
-				gwords[maxPlayers + i] = word;
+				gwords[getMaxPlayers() + i] = word;
 			}
 			input.close();
 			
@@ -557,15 +551,15 @@ public class AgentGameController extends MockAgent {
 			bufRead = new BufferedReader(input);
 	
 			// gerar indexes para linhas aleatorias
-			for(int i=0 ; i < maxPlayers ; i++)
+			for(int i=0 ; i < getMaxPlayers() ; i++)
 				rnd[i]=gen.nextInt(370)+1;
 
 			// ler palavras (tamanho 6)
 			Arrays.sort(rnd);
-			for(int i=0,adj=0; i < maxPlayers; adj=rnd[i++]) {
+			for(int i=0,adj=0; i < getMaxPlayers(); adj=rnd[i++]) {
 				bufRead.skip((rnd[i]-adj) * 7);
 				String word = bufRead.readLine();
-				gwords[maxPlayers*2 + i] = word;
+				gwords[getMaxPlayers()*2 + i] = word;
 			}
 			input.close();
 		} catch (Exception e) {
