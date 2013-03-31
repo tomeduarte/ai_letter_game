@@ -163,4 +163,18 @@ public class AgentInformation {
 		drawnPanel.repaint();
 		SwingUtilities.getRoot(drawnPanel).validate();
 	}
+	
+	/**
+	 * UI - disable remove button
+	 */
+	public void disableRemoveButton() {
+		getRemoveButton().setEnabled(false);
+	}
+	
+	/**
+	 * UI - enable remove button
+	 */
+	public void enableRemoveButton() {
+		getRemoveButton().setEnabled(true);
+	}
 }

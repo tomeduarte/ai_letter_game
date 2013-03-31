@@ -70,17 +70,6 @@ public class AgentGameController extends MockAgent {
 	public void startGame() {
 		currentBehaviour = null;
 
-		// UI updates
-		// switch enabled action buttons
-		/*
-		myGui.btnStartGame.setEnabled(false);
-		myGui.comboPlayer1.setEnabled(false);
-		myGui.comboPlayer2.setEnabled(false);
-		myGui.comboPlayer3.setEnabled(false);
-		myGui.comboPlayer4.setEnabled(false);
-		myGui.btnStopGame.setEnabled(true);
-		*/
-
 		// create the players
 		try {
 			// holders for agents and game state
