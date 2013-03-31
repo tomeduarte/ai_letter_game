@@ -185,19 +185,19 @@ public class AgentPlayer extends MockAgent
 			// 			act upon it according to our behaviour
 			//				either try to sell or not; in the latter, doWait() needs to be on the sell behaviour to block this one.
 			//			addBehaviour(new waitCFPBehaviour());
-			
+
 			//		get INFORM: turn ended
 			//			start waitTurn or waitCFP
 			try {
 				ACLMessage msg = myAgent.blockingReceive();
 				int performative = msg.getPerformative();
 				String content = msg.getContent();
-				
+
 				switch(performative) {
 					case ACLMessage.INFORM:
 						if(content.equals("Main screen turn on.")) { // is it our turn?
 							System.out.println(myAgent.getName() + " next up - my turn"); 
-							
+
 							addBehaviour(new waitTurnBehaviour());
 						} else if (content.substring(0,7).equals("UPDATE;")) { // sold letter
 							credits += Integer.parseInt(content.split(";")[1]);
@@ -208,11 +208,11 @@ public class AgentPlayer extends MockAgent
 						} else if (content.substring(0,7).equals("DELETE;")) { // bought letter
 							credits -= Integer.parseInt(content.split(";")[1]);
 							letters = letters + content.split(";")[2];
-							
+
 							addBehaviour(new waitTurnBehaviour());
 						} else {
 							System.out.println(myAgent.getName() + " next up - CFP"); 
-							
+
 							addBehaviour(new waitCFPBehaviour());
 						}
 						break;
@@ -237,9 +237,9 @@ public class AgentPlayer extends MockAgent
 							message.setContent("Video is being routed to the main screen.");
 						else {
 							if(Six.indexOf(c) != -1)
-								message.setContent("4");
+								message.setContent("6");
 							else if(Four.indexOf(c) != -1)
-								message.setContent("3");
+								message.setContent("4");
 							else if(Two.indexOf(c) != -1)
 								message.setContent("2");
 							else if(One.indexOf(c) != -1)
@@ -256,7 +256,7 @@ public class AgentPlayer extends MockAgent
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}		
+			}
 		}
 	}
 }
