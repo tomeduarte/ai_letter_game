@@ -18,11 +18,11 @@ public class AgentPlayer extends MockAgent
 	private int totalFails;
 	private String[] goalStrings;
 	private String letters;
-	
+
 	public AgentPlayer() {
 		this.serviceDescriptionType = "player" + hashCode();
 		this.serviceDescriptionName = "game-player" + hashCode();
-		
+
 		goalStrings = new String[3];
 		letters = new String();
 		lastRequested = 0;
@@ -34,7 +34,7 @@ public class AgentPlayer extends MockAgent
 		super.setup();
 		addBehaviour(new initGamestateBehaviour());
 	}
-	
+
 	protected boolean canBuildGoalString() {
 		/*
 		for(int j = 0; j < goalStrings.length; j++ ) {
@@ -68,7 +68,7 @@ public class AgentPlayer extends MockAgent
 
 		return true;
 	}
-	
+
 	protected String needLetter() {
 		if (canBuildGoalString())
 			return new String("NO MORE");
@@ -116,11 +116,13 @@ public class AgentPlayer extends MockAgent
 
 	private void debugLog(String message) {
 		if(logLevel == LOG_DEBUG)
-			System.out.println("[PL. DEBUG] " + message);
+			System.out.println("[PL. " + this.getLocalName() + " DEBUG] " + message);
 	}
 
 	class initGamestateBehaviour extends OneShotBehaviour {
 		public void action() {
+			debugLog("### initGamestateBehaviour");
+
 			// get the start message from the controller
 			ACLMessage gameinfo = new ACLMessage(ACLMessage.INFORM);
 			gameinfo = myAgent.blockingReceive();
@@ -137,16 +139,17 @@ public class AgentPlayer extends MockAgent
 			// is it my turn next or should I wait for CFP ?
 			if(Boolean.parseBoolean(info[5])) {
 				addBehaviour(new waitTurnBehaviour());
-				debugLog("initGamestateBehaviour - add waitTurnBehaviour()");
+//				debugLog("initGamestateBehaviour - add waitTurnBehaviour()");
 			} else {
 				addBehaviour(new waitCFPBehaviour());
-				debugLog("initGamestateBehaviour - add waitCFPBehaviour()");
+//				debugLog("initGamestateBehaviour - add waitCFPBehaviour()");
 			}
 		}
 	}
 	class waitTurnBehaviour extends OneShotBehaviour {
 		public void action() {
-			debugLog("### waitTurnBehaviour - has " + letters + " for " + goalStrings[level]);
+			debugLog("### waitTurnBehaviour");
+//			debugLog("has " + letters + " for " + goalStrings[level]);
 
 			// get INFORM to start our turn
 			ACLMessage startTurn = new ACLMessage(ACLMessage.INFORM);
@@ -155,9 +158,9 @@ public class AgentPlayer extends MockAgent
 			// do we need a letter?
 			String reqLetter = ((AgentPlayer) myAgent).needLetter();
 			if(reqLetter.equals("NO MORE")) {
-				debugLog("### --- no letter needed");
+//				debugLog("### --- no letter needed");
 			} else if(reqLetter.length() > 0) {
-				debugLog("### --- needs " + reqLetter );
+//				debugLog("### --- needs " + reqLetter );
 
 				// send request
 				ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -171,7 +174,7 @@ public class AgentPlayer extends MockAgent
 				String proposals = answer.getContent();
 
 				// send decision
-				System.out.println("Received proposals: " + proposals);
+//				System.out.println("Received proposals: " + proposals);
 				String decision = ((AgentPlayer) myAgent).selectProposal(proposals); 
 				ACLMessage decisionMessage;
 				if (!decision.equals("For great justice.")) {
@@ -187,7 +190,7 @@ public class AgentPlayer extends MockAgent
 				addBehaviour(new waitCFPBehaviour());
 				return;
 			}
-			debugLog("### --- oi? turn ended and failed" + reqLetter );
+//			debugLog("### --- oi? turn ended and failed" + reqLetter );
 			totalFails++;
 
 			// notify the game controller turn has ended. 
@@ -203,7 +206,7 @@ public class AgentPlayer extends MockAgent
 			}
 			send(msg);
 
-			debugLog(msg.toString());
+//			debugLog(msg.toString());
 
 			// wait for CFP
 			addBehaviour(new waitCFPBehaviour());
@@ -211,6 +214,7 @@ public class AgentPlayer extends MockAgent
 	}
 	class waitCFPBehaviour extends OneShotBehaviour {
 		public void action() {
+			debugLog("### waitCFPBehaviour");
 			// get INFORM or CFP
 			// 		get CFP: request for proposal on a given letter
 			// 			act upon it according to our behaviour
@@ -224,10 +228,11 @@ public class AgentPlayer extends MockAgent
 				int performative = msg.getPerformative();
 				String content = msg.getContent();
 
+				debugLog("### --- performative: " + ACLMessage.getPerformative(performative));
 				switch(performative) {
 					case ACLMessage.INFORM:
 						if(content.equals("Main screen turn on.")) { // is it our turn?
-							System.out.println(myAgent.getName() + " next up - my turn"); 
+//							System.out.println(myAgent.getName() + " next up - my turn"); 
 
 							addBehaviour(new waitTurnBehaviour());
 						} else if (content.substring(0,7).equals("UPDATE;")) { // sold letter
@@ -242,7 +247,7 @@ public class AgentPlayer extends MockAgent
 
 							addBehaviour(new waitTurnBehaviour());
 						} else {
-							System.out.println(myAgent.getName() + " next up - CFP"); 
+//							System.out.println(myAgent.getName() + " next up - CFP"); 
 
 							addBehaviour(new waitCFPBehaviour());
 						}
