@@ -134,7 +134,7 @@ public class AgentInformation {
 	private String getCurrentWord() {
 		return getWords()[ getLevel() ];
 	}
-	
+
 	/**
 	 * UI - update display
 	 */
@@ -146,7 +146,7 @@ public class AgentInformation {
 			getPointsLabel().setText( String.valueOf(getPoints()) );
 			getPlayingLabel().setText( String.valueOf(isPlaying()) );
 			getLevelLabel().setText( String.valueOf(getLevel()) );
-			
+
 			drawnPanel.revalidate();
 			drawnPanel.repaint();
 			SwingUtilities.getRoot(drawnPanel).validate();

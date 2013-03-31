@@ -139,17 +139,6 @@ public class AgentGameController extends MockAgent {
 				acPlayers = null;
 			}
 		}
-		
-		// UI updates
-		// switch enabled action buttons
-		/*
-		myGui.btnStopGame.setEnabled(false);
-		myGui.comboPlayer1.setEnabled(true);
-		myGui.comboPlayer3.setEnabled(true);
-		myGui.comboPlayer2.setEnabled(true);
-		myGui.comboPlayer4.setEnabled(true);
-		myGui.btnStartGame.setEnabled(true);
-		*/
 	}
 
 	public AgentInformation addPlayer() {
@@ -236,16 +225,6 @@ public class AgentGameController extends MockAgent {
 								consoleLog(currentPlayerInfo.getName()
 											+ " has leveled up and is now on level "
 											+ currentPlayerInfo.getLevel() + ".");
-								/*
-								String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
-								switch (currentPlayer) {
-									case 0: myGui.txtInfoPlayer1.setText(ui); break;
-									case 1: myGui.txtInfoPlayer2.setText(ui); break;
-									case 2: myGui.txtInfoPlayer3.setText(ui); break;
-									case 3: myGui.txtInfoPlayer4.setText(ui); break;
-									default: break;
-								}
-								*/
 							}
 						} else if(content.equals("I'll be outside playing.")) {
 							currentPlayerInfo.setPlaying(false);
@@ -341,34 +320,11 @@ public class AgentGameController extends MockAgent {
 						updateMessage.setContent("DELETE;"+details[1]+";"+details[2]);
 						send(updateMessage);
 						
-						/*
-						String ui = "Player "+ (currentPlayer+1) + " ["+ credits[currentPlayer] +"] " + goalWords[currentPlayer];
-						switch (currentPlayer) {
-							case 0: myGui.txtInfoPlayer1.setText(ui); break;
-							case 1: myGui.txtInfoPlayer2.setText(ui); break;
-							case 2: myGui.txtInfoPlayer3.setText(ui); break;
-							case 3: myGui.txtInfoPlayer4.setText(ui); break;
-							default: break;
-						}
-						*/
-						
 						// seller
 						updateMessage.addReceiver(new AID(details[0], AID.ISLOCALNAME));
 						updateMessage.setContent("UPDATE;"+details[1]+";"+details[2]);
 						send(updateMessage);
 						System.out.println("Accepted proposal: "+proposal);
-						
-						/*
-						int player = Integer.parseInt(""+details[0].charAt(6))-1;
-						String ui2 = "Player "+ (player+1) + " ["+ credits[player] +"] " + goalWords[player];
-						switch (player) {
-							case 0: myGui.txtInfoPlayer1.setText(ui2); break;
-							case 1: myGui.txtInfoPlayer2.setText(ui2); break;
-							case 2: myGui.txtInfoPlayer3.setText(ui2); break;
-							case 3: myGui.txtInfoPlayer4.setText(ui2); break;
-							default: break;
-						}
-						*/
 						break;
 					case ACLMessage.REJECT_PROPOSAL:
 						addBehaviour(new doTurnBehaviour());
