@@ -347,7 +347,7 @@ public class AgentGameController extends MockAgent {
 //						System.out.println("Accepted proposal: "+proposal);
 						break;
 					case ACLMessage.REJECT_PROPOSAL:
-						addBehaviour(new doTurnBehaviour());
+//						addBehaviour(new doTurnBehaviour());
 						break;
 					default:
 						break;
@@ -436,6 +436,7 @@ public class AgentGameController extends MockAgent {
 
 		return sletters;
 	}
+
 	private String[] getStartingLetters(String[] words) {
 		String letters = new String();
 

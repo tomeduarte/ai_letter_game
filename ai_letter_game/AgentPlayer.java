@@ -29,74 +29,112 @@ public class AgentPlayer extends MockAgent
 		totalFails = 0;
 	}
 
-	@Override
-	protected void setup() {
-		super.setup();
-		addBehaviour(new initGamestateBehaviour());
+	// ### HELPERS
+	public int getLevel() {
+		return level;
 	}
 
-	protected boolean canBuildGoalString() {
-		/*
-		for(int j = 0; j < goalStrings.length; j++ ) {
-			for (int i = 0; i < goalStrings[j].length(); i++) {
-			    char c = goalStrings[j].charAt(i);        
-			    int index = tmp.indexOf(c);
-			    
-			    if(index == -1)
-			    	return false;
-			    else
-			    	tmp = tmp.substring(0,index)+tmp.substring(index+1);
-			}
-		}
-		*/
+	public String getLetters() {
+		return letters;
+	}
 
-		String tmp = new String(letters);
-		String goalWord = goalStrings[level];
+	public String currentGoalWord() {
+		return goalStrings[getLevel()];
+	}
+
+	/**
+	 * Checks if the agent needs this letter or can sell it
+	 * @param received
+	 * @return
+	 */
+	protected boolean isSellable(char letter) {
+		int timesNeeded = timesInWord(letter, currentGoalWord());
+		int timesPresent = timesInWord(letter, getLetters());
+
+		return (timesNeeded > 0) ? (timesPresent > timesNeeded) : true;
+	}
+
+	/**
+	 * @return how many times the letter is present in word
+	 */
+	private int timesInWord(char letter, String word) {
+		String tmp = new String(word);
+		int timesPresent = 0;
+		int index = tmp.indexOf(letter);
+		while ( index != -1 ) {
+			timesPresent++;
+			tmp = tmp.substring(0,index) + tmp.substring(index+1);
+
+			index = tmp.indexOf(letter);
+		}
+
+		return timesPresent;
+	}
+
+	private void debugLog(String message) {
+		if(logLevel == LOG_DEBUG)
+			System.out.println("[PL. " + this.getLocalName() + " DEBUG] " + message);
+	}
+
+	// ### LOGIC
+	protected boolean canBuildLevelGoalString() {
+		String characterList = new String(getLetters());
+		String goalWord = new String(currentGoalWord());
 
 		for(int i = 0; i < goalWord.length(); i++) {
 			char characterAtPosition = goalWord.charAt(i);
-			int index = tmp.indexOf(characterAtPosition);
+			int index = characterList.indexOf(characterAtPosition);
 
 			if(index == -1) {
 				// characters missing
 				return false;
 			} else {
 				// remove from character list
-				tmp = tmp.substring(0,index)+tmp.substring(index+1);
+				characterList = characterList.substring(0,index)+characterList.substring(index+1);
 			}
 		}
 
 		return true;
 	}
 
-	protected String needLetter() {
-		if (canBuildGoalString())
-			return new String("NO MORE");
+	/**
+	 * Returns the next missing letter to reach the goal word, if any.
+	 * 
+	 * @return the next missing letter
+	 * @return the string "NO" if the agent already has all letters
+	 */
+	protected String neededLetter() {
+		// return right away if there isn't a missing letter
+		if (canBuildLevelGoalString())
+			return new String("NO");
 
-		char c;
-		String word = goalStrings[level];
+		return neededLetter(getLetters(), currentGoalWord());
+	}
+
+	private String neededLetter(String letters, String word) {
 		String allLetters = new String(letters);
+		String tmpWord = new String(word);
 
-		if(lastRequested == word.length()) {
-			lastRequested = 8;
-			return new String("NO MORE");
-		} else if (lastRequested == 8) {
-			lastRequested = 0;
+		// return the first unavailable letter
+		char c = tmpWord.charAt(0);
+		if(allLetters.indexOf(c) == -1) {
+			return new String(""+c);
+		} else {
+			tmpWord = tmpWord.substring(1);
+			allLetters = allLetters.substring(0,allLetters.indexOf(c))+allLetters.substring(allLetters.indexOf(c)+1);
+			return neededLetter(allLetters, tmpWord);
 		}
-
-		for(int i= lastRequested; i < word.length(); i++) {
-			c = word.charAt(i);
-			if(allLetters.indexOf(c) == -1) {
-				lastRequested = i;
-				return new String(""+c);
-			}
-		}
-		return new String();
 	}
 
 	protected String selectProposal(String received) {
-		int min = -1;
+		debugLog("Selecting proposals from: " + received);
+
 		String selected = new String("For great justice.");
+		int min = -1;
+
+		if (received.isEmpty())
+			return selected;
+
 		String[] proposals = received.split(";");
 		for(String proposal : proposals) {
 			String[] details = proposal.split("#");
@@ -105,18 +143,17 @@ public class AgentPlayer extends MockAgent
 				if(min == -1 || min > price) {
 					min = price;
 					selected = details[0].substring(0,7) + ";" + price + ";";
-					continue;
 				}
-			} else {
-				return "For great justice.";
 			}
 		}
 		return selected;
 	}
 
-	private void debugLog(String message) {
-		if(logLevel == LOG_DEBUG)
-			System.out.println("[PL. " + this.getLocalName() + " DEBUG] " + message);
+	// ### AGENT BEHAVIOUR
+	@Override
+	protected void setup() {
+		super.setup();
+		addBehaviour(new initGamestateBehaviour());
 	}
 
 	class initGamestateBehaviour extends OneShotBehaviour {
@@ -139,28 +176,27 @@ public class AgentPlayer extends MockAgent
 			// is it my turn next or should I wait for CFP ?
 			if(Boolean.parseBoolean(info[5])) {
 				addBehaviour(new waitTurnBehaviour());
-//				debugLog("initGamestateBehaviour - add waitTurnBehaviour()");
 			} else {
 				addBehaviour(new waitCFPBehaviour());
-//				debugLog("initGamestateBehaviour - add waitCFPBehaviour()");
 			}
 		}
 	}
+
 	class waitTurnBehaviour extends OneShotBehaviour {
 		public void action() {
 			debugLog("### waitTurnBehaviour");
-//			debugLog("has " + letters + " for " + goalStrings[level]);
+			debugLog("has " + letters + " for " + goalStrings[level]);
 
 			// get INFORM to start our turn
 			ACLMessage startTurn = new ACLMessage(ACLMessage.INFORM);
 			startTurn = myAgent.blockingReceive();
 
 			// do we need a letter?
-			String reqLetter = ((AgentPlayer) myAgent).needLetter();
-			if(reqLetter.equals("NO MORE")) {
-//				debugLog("### --- no letter needed");
+			String reqLetter = ((AgentPlayer) myAgent).neededLetter();
+			if(reqLetter.equals("NO")) {
+				debugLog("### --- no letter needed");
 			} else if(reqLetter.length() > 0) {
-//				debugLog("### --- needs " + reqLetter );
+				debugLog("### --- needs " + reqLetter );
 
 				// send request
 				ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -182,6 +218,7 @@ public class AgentPlayer extends MockAgent
 					decision += reqLetter;
 				} else {
 					decisionMessage = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+					totalFails++;
 				}
 				decisionMessage.setContent(decision);
 				decisionMessage.addReceiver(new AID("GameController", AID.ISLOCALNAME));
@@ -190,18 +227,18 @@ public class AgentPlayer extends MockAgent
 				addBehaviour(new waitCFPBehaviour());
 				return;
 			}
-//			debugLog("### --- oi? turn ended and failed" + reqLetter );
-			totalFails++;
 
 			// notify the game controller turn has ended. 
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(new AID("gameController", AID.ISLOCALNAME));
-			if(canBuildGoalString()) {	// have we completed this level?
+			if(canBuildLevelGoalString()) {	// have we completed this level?
 				msg.setContent("all your base are belong to us");
 				level = (level == 0) ? 1 : 2;
-			} else if(totalFails == 10) {
+				lastRequested = 0;
+				totalFails = 0;
+			} else if(totalFails == 10) { // this is the end, my friend.
 				msg.setContent("I'll be outside playing.");
-			} else {
+			} else { // to continue searching
 				msg.setContent("Treasure what little time remains of your lives.");
 			}
 			send(msg);
@@ -212,6 +249,8 @@ public class AgentPlayer extends MockAgent
 			addBehaviour(new waitCFPBehaviour());
 		}
 	}
+
+
 	class waitCFPBehaviour extends OneShotBehaviour {
 		public void action() {
 			debugLog("### waitCFPBehaviour");
@@ -253,6 +292,8 @@ public class AgentPlayer extends MockAgent
 						}
 						break;
 					case ACLMessage.REQUEST:
+						debugLog("### --- requested letter: " + content.charAt(0));
+
 						ACLMessage message = new ACLMessage(ACLMessage.PROPOSE);
 						message.addReceiver(new AID("gameController", AID.ISLOCALNAME));
 						/**
@@ -267,11 +308,17 @@ public class AgentPlayer extends MockAgent
 						String Two = "cumwfg";
 						String One = "ypbvkjxqz";
 						char c = content.charAt(0);
-						if(letters.indexOf(c) == -1) // no such letter here
+						if(letters.indexOf(c) == -1) { // no such letter here
+							debugLog("### --- no such letter");
+
 							message.setContent("Video is being routed to the main screen.");
-						else if(goalStrings[level].indexOf(c) != -1) // needs letter
+						} else if(!isSellable(c)) { // needs letter
+							debugLog("### --- this letter is needed to build goal word");
+
 							message.setContent("Video is being routed to the main screen.");
-						else {
+						} else {
+							debugLog("### --- making a proposal");
+
 							if(Six.indexOf(c) != -1)
 								message.setContent("6");
 							else if(Four.indexOf(c) != -1)
