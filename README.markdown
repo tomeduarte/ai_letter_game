@@ -13,9 +13,9 @@ The setup here described expects you will be using Eclipse to build and run the 
 
 Steps:
 
-1. clone this repository outside your eclipse workspace path (we'll assume it's called "repo");
-2. create a new java project in eclipse;
-3. import "repo/ai-letter-game" inside your project's "src/" directory; when importing, select advanced and use the link option;
-4. add "repo/lib/jade.jar" as an external JAR in the project libraries;
+1. clone this repository outside your eclipse workspace path (we'll assume it's called `repo`);
+2. create standard a new java project in eclipse; do not import the files on wizard.
+3. import `repo/ai-letter-game` inside your project's `src/` directory; when importing, select advanced and use the link option;
+4. go to the project's libraries and add `repo/lib/jade.jar` and `repo/lib/miglayout.jar` as external JARs in the project libraries;
 
-To run, run "repo/ai-letter-game/AILetterGame.java" as a regular Java Application.
+To run, start `repo/ai-letter-game/AILetterGame.java` as a regular Java Application.
