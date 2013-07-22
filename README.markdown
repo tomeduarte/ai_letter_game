@@ -19,3 +19,13 @@ Steps:
 4. go to the project's libraries and add `repo/lib/jade.jar` and `repo/lib/miglayout.jar` as external JARs in the project libraries;
 
 To run, start `repo/ai-letter-game/AILetterGame.java` as a regular Java Application.
+
+## Usage
+
+When you start the application you'll see a window which enables you to:
+
+- add new players
+- remove players
+- start the game
+
+Configure the desired number of players and start the game. You can stop it at anytime by clicking the stop game button.
