@@ -126,7 +126,7 @@ public class AgentGameController extends MockAgent {
 	}
 	
 	public void stopGame() {
-		removeBehaviour(currentBehaviour);
+		//removeBehaviour(currentBehaviour);
 		currentBehaviour = null;
 		
 		// remove the players
@@ -134,7 +134,7 @@ public class AgentGameController extends MockAgent {
 			for(int i=0; i< getMaxPlayers(); i++)
 				acPlayers[i].kill();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
 		} finally {
 			if (acPlayers != null) { 
 				for(int i=0; i< getMaxPlayers(); i++) {

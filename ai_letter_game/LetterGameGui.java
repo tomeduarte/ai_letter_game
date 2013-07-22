@@ -66,7 +66,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	private void setupGUILayout() {
 
 		// ==== LAYOUT ====
-		this.layout 	  	= new MigLayout("debug", "[grow, fill]", "[]");
+		this.layout 	  	= new MigLayout("", "[grow, fill]", "[]");
 		this.playersPanel 	= new JPanel(layout);
 		this.controlsPanel  = new JPanel(layout);
 		this.globalPanel 	= new JPanel(new MigLayout("debug", "[grow, fill]", "[]10[]"));
@@ -93,16 +93,16 @@ public class LetterGameGui extends JFrame implements ActionListener{
 		newPlayerAddButton.addActionListener(this);
 
 		// start and stop buttons
-		this.startGameButton = new JButton("Start game!");
+		this.startGameButton = new JButton("Iniciar jogo");
 		startGameButton.addActionListener(this);
-		this.stopGameButton = new JButton("Stop game");
+		this.stopGameButton = new JButton("Parar jogo");
 		stopGameButton.addActionListener(this);
 		stopGameButton.setEnabled(false);
 
 		// add elements to the bottom layout panel
-		controlsPanel.add(numberOfPlayers, "center, flowy, split 2");
-		controlsPanel.add(numberOfPlayersLegend, "center, width pref!");
-		controlsPanel.add(newPlayerBehaviourCombo, "center, flowy, split 2");
+//		controlsPanel.add(numberOfPlayers, "center, flowy, split 2");
+//		controlsPanel.add(numberOfPlayersLegend, "center, width pref!");
+//		controlsPanel.add(newPlayerBehaviourCombo, "center, flowy, split 2");
 		controlsPanel.add(newPlayerAddButton, "center");
 		controlsPanel.add(startGameButton, "gap unrel, growy");
 		controlsPanel.add(stopGameButton, "growy");
@@ -138,7 +138,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent ae) {
 		String action = ae.getActionCommand();
 		
-		if(action.equals("Start game!")) {
+		if(action.equals("Iniciar jogo")) {
 			doLog("Starting game..");
 			// update UI
 			startGameButton.setEnabled(false);
@@ -152,7 +152,7 @@ public class LetterGameGui extends JFrame implements ActionListener{
 			// start agents
 			myAgent.startGame();
 			doLog("OK");
-		} else if(action.equals("Stop game")) {
+		} else if(action.equals("Parar jogo")) {
 			doLog("Stopping game..");
 			// stop agents
 			myAgent.stopGame();
